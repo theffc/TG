@@ -1,4 +1,5 @@
-		
+from __future__ import print_function		
+
 class Grafo(object):
 	"""docstring for Grafo"""
 
@@ -7,25 +8,38 @@ class Grafo(object):
 	totalVertices=0
 	totalArestas=0
 		
-	def newV(xy):
-		v= Vertice(xy)
+	@staticmethod
+	def newV(Rect):
+		v= Vertice(Rect)
 		Grafo.vertices.append(v)
 		Grafo.totalVertices+=1
 
 	def newA():
 		pass
 
+	@staticmethod
+	def mostrarV():
+		print('[')	
+		for x in Grafo.vertices:
+			x.mostrar()
+		print(']')
+
+
 class Vertice(object):
 
 	vid=1
 
 	"""docstring for Vertice"""
-	def __init__(self, xy):
+	def __init__(self, Rect):
 		super(Vertice, self).__init__()
-		self.xy = xy
-		
-		self.id = self.vid
-		self.vid+=1
+		self.Rect = Rect
+		self.center = Rect.center
+		self.id = Vertice.vid
+		Vertice.vid = Vertice.vid + 1
+
+	def mostrar(self):
+		#print ( str(self.id)+ ' - ' + str(self.Rect) , ',', '')
+		print(self.id, self.center, sep=' - ')
 		
 		
 
@@ -37,5 +51,3 @@ class Aresta(object):
 		self.vertices = vertices
 		
 
-
-Grafo.newV(2)
