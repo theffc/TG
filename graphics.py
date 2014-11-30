@@ -35,7 +35,7 @@ while not quitGame:
 			clique+=1
 			clock.tick_busy_loop(FPS*0.1)
 			if pygame.event.get(pygame.MOUSEBUTTONDOWN):
-				Rect = pygame.Rect(event.pos, (RECT_SIZE, RECT_SIZE))
+				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
 				Grafo.newV(Rect)
 				pygame.Surface.fill(SCREEN,(0,255,0))
 				Grafo.mostrarV()
