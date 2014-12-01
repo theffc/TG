@@ -7,6 +7,7 @@ class Grafo(object):
 	lArestas=[]
 	iTotalVertices=0
 	iTotalArestas=0
+	selecionado=None
 		
 	@staticmethod
 	def newV(Rect):
@@ -47,7 +48,7 @@ class Grafo(object):
 			return False
 
 		Rect = v1.Rect.union(v2.Rect)
-		aresta = [Rect,v1,v2]
+		aresta = (Rect, v1, v2)
 		lArestas.append(aresta)
 		Grafo.iTotalArestas+=1
 		v1.setAdjs.add(v2.iID)
@@ -66,7 +67,6 @@ class Vertice(object):
 		self.tCenter = Rect.center
 		self.iID = Vertice.iVid
 		Vertice.iVid += 1
-		self.bSelecionado=False
 		self.setAdjs=set().add(Vertice.iVid)
 
 	def mostrar(self):
@@ -80,6 +80,6 @@ class Aresta(object):
 	"""docstring for Aresta"""
 	def __init__(self, lVertices):
 		super(Aresta, self).__init__()
-		self.lVertices = lVertices
+		
 		
 

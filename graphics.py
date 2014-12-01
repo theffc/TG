@@ -37,17 +37,19 @@ while not quitGame:
 		elif event.type == pygame.MOUSEBUTTONDOWN: #clicou
 			local = Grafo.verificarClique(event.pos)
 			clock.tick_busy_loop(FPS*0.1)
-			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, Vertice): # doubleclick
+			localEhUmVertice = isinstance(local, Vertice)
+
+			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not localEhUmVertice: # doubleclick
 				Rect=pygame.draw.circle(SCREEN,(0,0,255),event.pos,RECT_SIZE, RECT_SIZE/10)
 				Grafo.newV(Rect)
 				Grafo.mostrarV()
 				continue
 		
-			if not local: # clicou no vazio
+			elif not local: # clicou no vazio
 				continue
 
-			local.bSelecionado=True
-			if pygame.mouse.get_pressed()[0]: # botao esquerdo do mouse continua pressionado
+			Grafo.selecionado = local
+			if pygame.mouse.get_pressed()[0] and localEhUmVertice: # botao esquerdo do mouse continua pressionado
 				disclique = pygame.event.get(MOUSEBUTTONUP)
 				while not disclique:
 					pygame.event.wait()
@@ -55,13 +57,15 @@ while not quitGame:
 					
 				local2 = verificarClique(disclique.pos)
 				if isinstance(local2, Vertice):
-					# criar uma nova aresta
-					pass
-
+					Grafo.newA(loacal1, local2)
+					
 				else:
 					# Mover o rect do vertice
 					pass
 
+
+			if : # verificar se o usuário apertou o delete
+				pass
 
 
 		
