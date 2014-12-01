@@ -14,9 +14,6 @@ class Grafo(object):
 		Grafo.vertices.append(v)
 		Grafo.totalVertices+=1
 
-	def newA():
-		pass
-
 	@staticmethod
 	def mostrarV():
 		print('[')	
@@ -24,6 +21,12 @@ class Grafo(object):
 			x.mostrar()
 		print(']')
 
+	@staticmethod
+	def colidiuXY(ponto):
+		for vertice in Grafo.vertices:
+			if vertice.Rect.collidepoint(ponto):
+				return True
+		return False
 
 class Vertice(object):
 
@@ -35,7 +38,7 @@ class Vertice(object):
 		self.Rect = Rect
 		self.center = Rect.center
 		self.id = Vertice.vid
-		Vertice.vid = Vertice.vid + 1
+		Vertice.vid += 1
 
 	def mostrar(self):
 		#print ( str(self.id)+ ' - ' + str(self.Rect) , ',', '')
