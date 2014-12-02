@@ -16,17 +16,16 @@ RECT_SIZE = int(WIDTH * 0.02)
 
 SCREEN = pygame.display.set_mode(RESOLUTION)#, pygame.FULLSCREEN)
 
-pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.KEYDOWN, pygame.KEYUP, pygame.VIDEORESIZE, pygame.JOYAXISMOTION, pygame.JOYBALLMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
+pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.VIDEORESIZE, pygame.JOYAXISMOTION, pygame.JOYBALLMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
+#pygame.event.set_allowed(None)
+
 
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(1)
 
 
-
-clique=0
-disclique=0
 while not quitGame:
-
+	
 	events = pygame.event.get()
 	for event in events:
 
@@ -36,11 +35,13 @@ while not quitGame:
 
 		elif event.type == pygame.MOUSEBUTTONDOWN: #clicou
 			local = Grafo.verificarClique(event.pos)
+			Grafo.selecionado = local
+			print local
 			clock.tick_busy_loop(FPS*0.1)
 			localEhUmVertice = isinstance(local, Vertice)
 
 			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not localEhUmVertice: # doubleclick
-				Rect=pygame.draw.circle(SCREEN,(0,0,255),event.pos,RECT_SIZE, RECT_SIZE/10)
+				Rect=pygame.draw.circle(SCREEN,(0,100,255),event.pos,RECT_SIZE, RECT_SIZE/10)
 				Grafo.newV(Rect)
 				Grafo.mostrarV()
 				continue
@@ -48,33 +49,37 @@ while not quitGame:
 			elif not local: # clicou no vazio
 				continue
 
-			Grafo.selecionado = local
-			if pygame.mouse.get_pressed()[0] and localEhUmVertice: # botao esquerdo do mouse continua pressionado
-				disclique = pygame.event.get(MOUSEBUTTONUP)
+			elif localEhUmVertice and pygame.mouse.get_pressed()[0] : # botao esquerdo do mouse continua pressionado
+				disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
 				while not disclique:
-					pygame.event.wait()
-					disclique = pygame.event.get(MOUSEBUTTONUP)
+					pygame.event.set_allowed(None)
+					pygame.event.set_allowed(pygame.MOUSEBUTTONUP)
+					disclique=pygame.event.wait()
+					print disclique
 					
-				local2 = verificarClique(disclique.pos)
+				local2 = Grafo.verificarClique(disclique.pos)
+				print local2
 				if isinstance(local2, Vertice):
-					Grafo.newA(loacal1, local2)
+					aresta = Grafo.newA(local, local2)
+					print Grafo.iTotalArestas
+					pygame.draw.line(SCREEN, (255,0,255), local.tCenter, local2.tCenter )	# desclicou num vertice para criar uma aresta
 					
 				else:
 					# Mover o rect do vertice
-					pass
+					SCREEN.fill((0,0,0), local.Rect)
+					local.Rect = pygame.draw.circle(SCREEN,(0,100,255),disclique.pos,RECT_SIZE, RECT_SIZE/10)
+					local.tCenter = local.Rect.center
 
 
-			if : # verificar se o usuário apertou o delete
+			elif True: # verificar se o usuario apertou o delete
 				pass
 
+		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
 
-		
-
-	pygame.display.update()
 	
-	clique=0
-	disclique=0
+	pygame.display.update()
 	clock.tick(FPS)
+
 
 pygame.quit()
 

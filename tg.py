@@ -17,10 +17,11 @@ class Grafo(object):
 
 	@staticmethod
 	def mostrarV():
-		print('[')	
+		print('[ VERTICES')	
 		for x in Grafo.lVertices:
 			x.mostrar()
-		print(']')
+		print('VERTICES ]')
+
 
 	@staticmethod
 	def verticeClique(ponto):
@@ -36,7 +37,7 @@ class Grafo(object):
 				return vertice
 
 		for aresta in Grafo.lArestas:
-			if aresta.Rect.collidepoint(ponto):
+			if aresta[0].collidepoint(ponto):
 				return aresta
 
 		return None
@@ -44,30 +45,36 @@ class Grafo(object):
 
 	@staticmethod
 	def newA(v1, v2):
-		if v1.iID in v2.setAdjs or v2.iID in v1.setAdjs
-			return False
+		
+
+		if v1.iID in v2.setAdjs:
+			return None
 
 		Rect = v1.Rect.union(v2.Rect)
 		aresta = (Rect, v1, v2)
-		lArestas.append(aresta)
+		Grafo.lArestas.append(aresta)
 		Grafo.iTotalArestas+=1
 		v1.setAdjs.add(v2.iID)
 		v2.setAdjs.add(v1.iID)
-		return True
+		return aresta
 
+	@staticmethod
+	def desenhar():
+		pass
 
 class Vertice(object):
 
-	iVid=1
+	iVid=0
 
 	"""docstring for Vertice"""
 	def __init__(self, Rect):
 		super(Vertice, self).__init__()
 		self.Rect = Rect
 		self.tCenter = Rect.center
-		self.iID = Vertice.iVid
+		self.iID = int( Vertice.iVid +1 )
 		Vertice.iVid += 1
-		self.setAdjs=set().add(Vertice.iVid)
+		self.setAdjs=set()
+		self.setAdjs.add(self.iID)
 
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
