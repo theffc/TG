@@ -69,6 +69,7 @@ while not quitGame:
 					SCREEN.fill((0,0,0), local.Rect)
 					local.Rect = pygame.draw.circle(SCREEN,(0,100,255),disclique.pos,RECT_SIZE, RECT_SIZE/10)
 					local.tCenter = local.Rect.center
+					local.iMudouPos = len(local.setAdjs)
 
 
 			elif True: # verificar se o usuario apertou o delete

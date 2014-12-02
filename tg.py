@@ -37,6 +37,14 @@ class Grafo(object):
 				return vertice
 
 		for aresta in Grafo.lArestas:
+			if aresta[1].iMudouPos or aresta[2].iMudouPos:
+				aresta[0] = aresta[1].Rect.union(aresta[2].Rect)
+				if not aresta[1]:
+					aresta[1].iMudouPos -= 1
+				else:
+					aresta[2].iMudouPos -= 1
+				
+
 			if aresta[0].collidepoint(ponto):
 				return aresta
 
@@ -51,7 +59,7 @@ class Grafo(object):
 			return None
 
 		Rect = v1.Rect.union(v2.Rect)
-		aresta = (Rect, v1, v2)
+		aresta = [Rect, v1, v2]
 		Grafo.lArestas.append(aresta)
 		Grafo.iTotalArestas+=1
 		v1.setAdjs.add(v2.iID)
@@ -75,6 +83,7 @@ class Vertice(object):
 		Vertice.iVid += 1
 		self.setAdjs=set()
 		self.setAdjs.add(self.iID)
+		self.iMudouPos = 0
 
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
