@@ -16,6 +16,7 @@ class Grafo(object):
 		v= Vertice(Rect)
 		Grafo.lVertices.append(v)
 		Grafo.iTotalVertices+=1
+		Grafo.selectedV = v
 
 	@staticmethod
 	def mostrarV():
@@ -26,29 +27,34 @@ class Grafo(object):
 
 
 	@staticmethod
-	def verticeClique(ponto):
+	def verificarClique(ponto):
+
 		for vertice in Grafo.lVertices:
 			if vertice.Rect.collidepoint(ponto):
-				return True
-		return False
+				Grafo.selectedV = vertice
+				Grafo.selectedA = None
+				return vertice
+		
+		if Grafo.selectedV :
+			for aresta in Grafo.lArestas:			
+				if aresta.t[0].iID == Grafo.selectedV.iID or aresta.t[1].iID == Grafo.selectedV.iID:
+					if aresta.Rect.collidepoint(ponto):
+						Grafo.selectedA=aresta
+						return aresta
+
+		Grafo.selectedA = None
+		Grafo.selectedV = None
+		return None
 
 	@staticmethod
-	def verificarClique(ponto):
+	def verificarDisclique(ponto):
 
 		for vertice in Grafo.lVertices:
 			if vertice.Rect.collidepoint(ponto):
 				Grafo.selectedV = vertice
 				return vertice
 
-		for aresta in Grafo.lArestas:			
-			if aresta.Rect.collidepoint(ponto):
-				Grafo.selectedA=aresta
-				return aresta
-
-		Grafo.selectedA = None
-		Grafo.selectedV = None
 		return None
-
 
 	@staticmethod
 	def newA(v1, v2):
@@ -74,7 +80,7 @@ class Vertice(object):
 	def __init__(self, Rect):
 		super(Vertice, self).__init__()
 		self.Rect = Rect
-		self.iID = int( Vertice.iVid +1 )
+		self.iID = int( Vertice.iVid ) +1
 		Vertice.iVid += 1
 		self.setAdjs=set()
 		self.setAdjs.add(self.iID)

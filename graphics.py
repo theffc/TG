@@ -1,8 +1,6 @@
 import pygame
 from tg import *
 
-
-
 FPS=50
 quitGame=False
 BLUE = (0,100,255)
@@ -10,22 +8,21 @@ PINK = (255,0,255)
 BLACK = (25,25,25)
 GREEN = (0,255,100)
 
-
 pygame.init()
 vidInfo = pygame.display.Info()
 
-WIDTH = vidInfo.current_w
-HEIGHT = vidInfo.current_h
+WIDTH = 800#vidInfo.current_w
+HEIGHT = 600#vidInfo.current_h
 RESOLUTION = (WIDTH, HEIGHT)
 RECT_SIZE = int(WIDTH * 0.02)
 LINE = int(WIDTH * 0.0025)
 
-SCREEN = pygame.display.set_mode(RESOLUTION, pygame.FULLSCREEN)
+SCREEN = pygame.display.set_mode(RESOLUTION)#, pygame.FULLSCREEN)
 
 pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.VIDEORESIZE, pygame.JOYAXISMOTION, pygame.JOYBALLMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
 #pygame.event.set_allowed(None)
 
-
+houveMudancas = True
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(1)
 
@@ -52,19 +49,22 @@ while not quitGame:
 
 		if event.type == pygame.QUIT:
 			quitGame=True
+			houveMudancas = True
 			break
 
 		#1 clicou
-		elif event.type == pygame.MOUSEBUTTONDOWN: 
+		elif event.type == pygame.MOUSEBUTTONDOWN:
+			houveMudancas = True 
 			local = Grafo.verificarClique(event.pos)
 			print local
 			clock.tick_busy_loop(FPS*0.1)
 
 			#2 doubleclick
-			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not Grafo.selectedV:
+			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, Vertice):
 				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE) 
 				Grafo.newV(Rect)
 				Grafo.mostrarV()
+				Grafo.selectedA=None
 				continue
 		
 			#2 clicou no vazio
@@ -84,7 +84,7 @@ while not quitGame:
 					print disclique
 				if disclique is list:
 					disclique = disclique[0]
-				local2 = Grafo.verificarClique(disclique.pos)
+				local2 = Grafo.verificarDisclique(disclique.pos)
 				print local2
 
 				#3 desclicou num vertice para criar uma aresta
@@ -95,6 +95,7 @@ while not quitGame:
 				#3 desclicou no vazio-> Mover o rect do vertice
 				else:
 					local.Rect = pygame.Rect(disclique.pos[0]-RECT_SIZE/2, disclique.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
+					local.mostrar()
 
 			#2 usuario apertou o delete
 			elif True: 
@@ -104,8 +105,12 @@ while not quitGame:
 		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
 
 	#for end
-	desenhar(SCREEN)
-	pygame.display.update()
+	
+	if houveMudancas:
+		desenhar(SCREEN)
+		pygame.display.update()
+		houveMudancas =False
+
 	clock.tick(FPS)
 
 #while end
