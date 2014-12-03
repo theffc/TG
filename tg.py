@@ -19,12 +19,41 @@ class Grafo(object):
 		Grafo.selectedV = v
 
 	@staticmethod
+	def removeArestasDoV(v):
+		for i, a in enumerate(Grafo.lArestas):
+			if a.t[0].iID in v.setAdjs and a.t[1].iID in v.setAdjs:
+				Grafo.removeA(a,i)
+
+
+	@staticmethod
+	def removeV():
+		print ("entrei no removeV")
+		v = Grafo.selectedV
+
+		if len(v.setAdjs)>1:
+			Grafo.removeArestasDoV(v)
+
+		Grafo.lVertices.remove(v)
+		Grafo.iTotalVertices -= 1
+		Grafo.selectedV = None
+		Grafo.selectedA = None
+
+		print ("sai do removeV")
+
+	@staticmethod
 	def mostrarV():
 		print('[ VERTICES')	
 		for x in Grafo.lVertices:
 			x.mostrar()
 		print('VERTICES ]')
 
+
+	@staticmethod
+	def mostrarA():
+		print('[ ARESTAS')	
+		for x in Grafo.lArestas:
+			x.mostrar()
+		print('ARESTAS ]')
 
 	@staticmethod
 	def verificarClique(ponto):
@@ -39,7 +68,9 @@ class Grafo(object):
 			for aresta in Grafo.lArestas:			
 				if aresta.t[0].iID == Grafo.selectedV.iID or aresta.t[1].iID == Grafo.selectedV.iID:
 					if aresta.Rect.collidepoint(ponto):
-						Grafo.selectedA=aresta
+						if Grafo.selectedA == aresta:
+							continue
+						Grafo.selectedA = aresta
 						return aresta
 
 		Grafo.selectedA = None
@@ -70,6 +101,21 @@ class Grafo(object):
 		v2.setAdjs.add(v1.iID)
 		return aresta
 
+	@staticmethod
+	def removeA(a, i=0):
+		a.t[0].setAdjs.discard(a.t[1].iID)
+		a.t[1].setAdjs.discard(a.t[0].iID)
+		if i:
+			del Grafo.lArestas[i]
+		else:
+			Grafo.lArestas.remove(a)
+		Grafo.iTotalArestas -= 1
+		Grafo.selectedA = None
+
+	@staticmethod
+	def mostrar():
+		Grafo.mostrarV()
+		Grafo.mostrarA()
 
 
 class Vertice(object):
@@ -102,5 +148,7 @@ class Aresta(object):
 		self.t = (v1, v2)
 		self.bMudouPos = True
 		
-		
+	def mostrar(self):
+		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
+		print("(", self.Rect.center,' )')	
 

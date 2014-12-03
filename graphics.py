@@ -26,6 +26,7 @@ houveMudancas = True
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(1)
 
+# desenha todas as coisas na tela
 def desenhar(Surf):
 	Surf.fill(BLACK)
 
@@ -42,6 +43,7 @@ def desenhar(Surf):
 		Grafo.selectedA.Rect = pygame.draw.line(Surf,GREEN,Grafo.selectedA.t[0].Rect.center,Grafo.selectedA.t[1].Rect.center, LINE)
 #desenhar end
 
+#loop principal
 while not quitGame:
 	
 	events = pygame.event.get()
@@ -49,10 +51,10 @@ while not quitGame:
 
 		if event.type == pygame.QUIT:
 			quitGame=True
-			houveMudancas = True
+			houveMudancas=False
 			break
 
-		#1 clicou
+		#1 mouse click
 		elif event.type == pygame.MOUSEBUTTONDOWN:
 			houveMudancas = True 
 			local = Grafo.verificarClique(event.pos)
@@ -63,7 +65,7 @@ while not quitGame:
 			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, Vertice):
 				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE) 
 				Grafo.newV(Rect)
-				Grafo.mostrarV()
+				Grafo.mostrar()
 				Grafo.selectedA=None
 				continue
 		
@@ -82,7 +84,7 @@ while not quitGame:
 					pygame.event.set_allowed(pygame.MOUSEBUTTONUP)
 					disclique=pygame.event.wait()
 					print disclique
-				if disclique is list:
+				if isinstance(disclique, list):
 					disclique = disclique[0]
 				local2 = Grafo.verificarDisclique(disclique.pos)
 				print local2
@@ -97,21 +99,27 @@ while not quitGame:
 					local.Rect = pygame.Rect(disclique.pos[0]-RECT_SIZE/2, disclique.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
 					local.mostrar()
 
-			#2 usuario apertou o delete
-			elif True: 
-				pass
+		#1 keyboard click
+		elif event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
+				houveMudancas = True
+				if Grafo.selectedA:
+					Grafo.removeA(Grafo.selectedA)
+				elif Grafo.selectedV:
+					Grafo.removeV()
 
 		#1 pygame pega apenas eventos interesssantes
-		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
+		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
 
 	#for end
 	
+	clock.tick(FPS)
 	if houveMudancas:
 		desenhar(SCREEN)
 		pygame.display.update()
 		houveMudancas =False
 
-	clock.tick(FPS)
+	
 
 #while end
 
