@@ -9,6 +9,7 @@ class Grafo(object):
 	iTotalArestas=0
 	selectedV=None
 	selectedA=None
+	lDirtyRects = []
 		
 	@staticmethod
 	def newV(Rect):
@@ -39,16 +40,7 @@ class Grafo(object):
 				Grafo.selectedV = vertice
 				return vertice
 
-		for aresta in Grafo.lArestas:
-			
-			# um dos vertices foi deslocado -> criar novo rect pra aresta
-			if aresta.t[0].iMudouPos or aresta.t[1].iMudouPos:
-				aresta.Rect = aresta.t[0].Rect.union(aresta.t[1].Rect)
-				if not aresta.t[0]:
-					aresta.t[0].iMudouPos -= 1
-				else:
-					aresta.t[1].iMudouPos -= 1
-			
+		for aresta in Grafo.lArestas:			
 			if aresta.Rect.collidepoint(ponto):
 				Grafo.selectedA=aresta
 				return aresta
@@ -65,6 +57,7 @@ class Grafo(object):
 		if v1.iID in v2.setAdjs:
 			return None
 
+		aresta= Aresta(v1,v2)
 		Grafo.lArestas.append(aresta)
 		Grafo.iTotalArestas+=1
 		v1.setAdjs.add(v2.iID)
@@ -88,16 +81,19 @@ class Grafo(object):
 				v.bMudouPos = False
 
 		for a in Grafo.lArestas:
-			if a.bMudouPos:
+			# um dos vertices foi deslocado -> criar novo rect pra aresta
+			if a.t[0].bMudouPos or a.t[1].bMudouPos:
+				pygame.draw.line(Surf, BLACK, a.Rect.)
 				a.Rect = pygame.draw.line(Surf, PINK, a.t[0].Rect.center, a.t[1].center, LINE)
-				a.bMudouPos = False
+				Grafo.lDirtyRects.append(a.Rect)
+
 
 class Vertice(object):
 	"""docstring for Vertice"""
 
 	iVid=0
 
-		def __init__(self, Rect):
+	def __init__(self, Rect):
 		super(Vertice, self).__init__()
 		self.Rect = Rect
 		self.iID = int( Vertice.iVid +1 )
