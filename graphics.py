@@ -7,6 +7,8 @@ FPS=50
 quitGame=False
 BLUE = (0,100,255)
 PINK = (255,0,255)
+BLACK = (25,25,25)
+GREEN = (0,255,100)
 
 
 pygame.init()
@@ -16,9 +18,9 @@ WIDTH = vidInfo.current_w
 HEIGHT = vidInfo.current_h
 RESOLUTION = (WIDTH, HEIGHT)
 RECT_SIZE = int(WIDTH * 0.02)
-LINE = int(WIDTH * 0.005)
+LINE = int(WIDTH * 0.0025)
 
-SCREEN = pygame.display.set_mode(RESOLUTION)#, pygame.FULLSCREEN)
+SCREEN = pygame.display.set_mode(RESOLUTION, pygame.FULLSCREEN)
 
 pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.VIDEORESIZE, pygame.JOYAXISMOTION, pygame.JOYBALLMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
 #pygame.event.set_allowed(None)
@@ -27,6 +29,21 @@ pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTI
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(1)
 
+def desenhar(Surf):
+	Surf.fill(BLACK)
+
+	for v in Grafo.lVertices:
+		v.Rect = pygame.draw.circle(Surf,BLUE,v.Rect.center,RECT_SIZE, LINE)
+
+	for a in Grafo.lArestas:
+		a.Rect = pygame.draw.line(Surf, PINK, a.t[0].Rect.center, a.t[1].Rect.center)
+
+	if Grafo.selectedV:
+		Grafo.selectedV.Rect = pygame.draw.circle(Surf,GREEN,Grafo.selectedV.Rect.center,RECT_SIZE, LINE)
+
+	if Grafo.selectedA:
+		Grafo.selectedA.Rect = pygame.draw.line(Surf,GREEN,Grafo.selectedA.t[0].Rect.center,Grafo.selectedA.t[1].Rect.center, LINE)
+#desenhar end
 
 while not quitGame:
 	
@@ -42,11 +59,10 @@ while not quitGame:
 			local = Grafo.verificarClique(event.pos)
 			print local
 			clock.tick_busy_loop(FPS*0.1)
-			localEhUmVertice = isinstance(local, Vertice)
 
 			#2 doubleclick
-			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not localEhUmVertice: 
-				Rect=pygame.draw.circle(SCREEN,BLUE,event.pos,RECT_SIZE, RECT_SIZE/10)
+			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not Grafo.selectedV:
+				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE) 
 				Grafo.newV(Rect)
 				Grafo.mostrarV()
 				continue
@@ -57,7 +73,7 @@ while not quitGame:
 
 
 			#2 botao esquerdo do mouse continua pressionado
-			elif localEhUmVertice and pygame.mouse.get_pressed()[0] : 
+			elif Grafo.selectedV and pygame.mouse.get_pressed()[0] : 
 				
 				#3 pegar o disclique
 				disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
@@ -66,6 +82,8 @@ while not quitGame:
 					pygame.event.set_allowed(pygame.MOUSEBUTTONUP)
 					disclique=pygame.event.wait()
 					print disclique
+				if disclique is list:
+					disclique = disclique[0]
 				local2 = Grafo.verificarClique(disclique.pos)
 				print local2
 
@@ -73,14 +91,10 @@ while not quitGame:
 				if isinstance(local2, Vertice):
 					aresta = Grafo.newA(local, local2)
 					print Grafo.iTotalArestas
-					pygame.draw.line(SCREEN, PINK, local.Rect.center, local2.Rect.center )
 				
 				#3 desclicou no vazio-> Mover o rect do vertice
 				else:
-					SCREEN.fill((0,0,0), local.Rect)
-					local.Rect = pygame.draw.circle(SCREEN, BLUE,disclique.pos,RECT_SIZE, LINE)
-					local.iMudouPos = len(local.setAdjs)
-					local.bMudouPos = True
+					local.Rect = pygame.Rect(disclique.pos[0]-RECT_SIZE/2, disclique.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
 
 			#2 usuario apertou o delete
 			elif True: 
@@ -90,7 +104,7 @@ while not quitGame:
 		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
 
 	#for end
-	
+	desenhar(SCREEN)
 	pygame.display.update()
 	clock.tick(FPS)
 
