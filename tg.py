@@ -1,4 +1,5 @@
-from __future__ import print_function		
+from __future__ import print_function
+from pygame import display		
 
 class Grafo(object):
 	"""docstring for Grafo"""
@@ -11,6 +12,8 @@ class Grafo(object):
 	selectedA=None
 	antigoRect=None
 	lDirtyRects = []
+	conexo = False
+	visited = {}
 		
 	@staticmethod
 	def newV(Rect):
@@ -18,13 +21,14 @@ class Grafo(object):
 		Grafo.lVertices.append(v)
 		Grafo.iTotalVertices+=1
 		Grafo.selectedV = v
+		Grafo.conexo=False
 
 	@staticmethod
 	def removeArestasDoV(v):
 		lcopia=Grafo.lArestas[:]
 		for a in lcopia:
-			if a.t[0].iID in v.setAdjs and a.t[1].iID in v.setAdjs:
-				Grafo.removeA(a)
+			if a.t[0].iID == v.iID or a.t[1].iID == v.iID:
+				Grafo.removeA(a, v)
 
 
 	@staticmethod
@@ -39,6 +43,7 @@ class Grafo(object):
 		Grafo.iTotalVertices -= 1
 		Grafo.selectedV = None
 		Grafo.selectedA = None
+		Grafo.conexo = Grafo.ehConexo()
 
 		print ("sai do removeV")
 
@@ -75,8 +80,14 @@ class Grafo(object):
 						Grafo.selectedA = aresta
 						return aresta
 
-		Grafo.selectedA = None
-		Grafo.selectedV = None
+		for aresta in Grafo.lArestas:
+			if aresta.Rect.collidepoint(ponto):
+				if Grafo.selectedA == aresta:
+						continue
+				Grafo.selectedA = aresta
+				Grafo.selectedV = None
+				return aresta
+
 		return None
 
 	@staticmethod
@@ -101,20 +112,55 @@ class Grafo(object):
 		Grafo.iTotalArestas+=1
 		v1.setAdjs.add(v2.iID)
 		v2.setAdjs.add(v1.iID)
+		if not Grafo.conexo:
+			Grafo.conexo= Grafo.ehConexo()
 		return aresta
 
 	@staticmethod
-	def removeA(a):
+	def removeA(a, v=0):
 		a.t[0].setAdjs.discard(a.t[1].iID)
 		a.t[1].setAdjs.discard(a.t[0].iID)
 		Grafo.lArestas.remove(a)
 		Grafo.iTotalArestas -= 1
 		Grafo.selectedA = None
+		if not v:
+			Grafo.conexo=Grafo.ehConexo()
 
 	@staticmethod
 	def mostrar():
 		Grafo.mostrarV()
 		Grafo.mostrarA()
+
+
+	@staticmethod
+	def busca_profundidade(v=0):
+		visited[v.iID]=True
+
+   	if not v:
+        v=Grafo.lArestas[0]
+
+   	for x in v.lAdjs:
+        if not visited[x.iID]:
+            busca_profundidade(x)
+
+
+	@staticmethod
+	def ehConexo():
+		if Grafo.iTotalArestas < Grafo.iTotalVertices-1 :
+			return False
+
+		conjunto = set()
+		#conjunto.add(Grafo.lArestas[0].t[0].iID)
+		for a in Grafo.lArestas:
+			conjunto = a.t[0].setAdjs & a.t[1].setAdjs
+			if not conjunto:
+				return False
+
+		x=len(conjunto)
+		print ("Conjunto: ", x)
+		if x > 0:
+			return True		
+		return False
 
 
 class Vertice(object):
@@ -129,8 +175,6 @@ class Vertice(object):
 		Vertice.iVid += 1
 		self.setAdjs=set()
 		self.setAdjs.add(self.iID)
-		self.iMudouPos = 0
-		self.bMudouPos = True
 
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
@@ -145,7 +189,7 @@ class Aresta(object):
 		super(Aresta, self).__init__()
 		self.Rect = v1.Rect.union(v2.Rect)
 		self.t = (v1, v2)
-		self.bMudouPos = True
+		self.fazParteDaArvore=False
 		
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')

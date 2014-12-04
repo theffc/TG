@@ -3,7 +3,7 @@ from tg import *
 
 FPS=50
 quitGame=False
-BLUE = (0,100,255)
+BLUE = (10,100,255)
 PINK = (255,0,255)
 BLACK = (25,25,25)
 GREEN = (0,255,100)
@@ -12,13 +12,14 @@ GRAY = (100,100,100)
 pygame.init()
 vidInfo = pygame.display.Info()
 
-WIDTH = 800#vidInfo.current_w
-HEIGHT = 600#vidInfo.current_h
+WIDTH = vidInfo.current_w -200
+HEIGHT = vidInfo.current_h -80
 RESOLUTION = (WIDTH, HEIGHT)
 RECT_SIZE = int(WIDTH * 0.02)
-LINE = int(WIDTH * 0.0025)
+CIRCLE = int(WIDTH * 0.0025)
+LINE = int(WIDTH * 0.002)
 
-SCREEN = pygame.display.set_mode(RESOLUTION)#, pygame.FULLSCREEN)
+SCREEN = pygame.display.set_mode(RESOLUTION, pygame.RESIZABLE)#, pygame.FULLSCREEN)
 
 pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.VIDEORESIZE, pygame.JOYAXISMOTION, pygame.JOYBALLMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
 #pygame.event.set_allowed(None)
@@ -32,16 +33,16 @@ def desenhar(Surf):
 	Surf.fill(BLACK)
 
 	if Grafo.antigoRect:
-		pygame.draw.circle(Surf, GRAY, Grafo.antigoRect.center, RECT_SIZE, LINE)
+		pygame.draw.circle(Surf, GRAY, Grafo.antigoRect.center, RECT_SIZE, CIRCLE)
 
 	for v in Grafo.lVertices:
-		v.Rect = pygame.draw.circle(Surf,BLUE,v.Rect.center,RECT_SIZE, LINE)
+		v.Rect = pygame.draw.circle(Surf,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
 
 	for a in Grafo.lArestas:
-		a.Rect = pygame.draw.line(Surf, PINK, a.t[0].Rect.center, a.t[1].Rect.center)
+		a.Rect = pygame.draw.line(Surf, PINK, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
 
 	if Grafo.selectedV:
-		Grafo.selectedV.Rect = pygame.draw.circle(Surf,GREEN,Grafo.selectedV.Rect.center,RECT_SIZE, LINE)
+		Grafo.selectedV.Rect = pygame.draw.circle(Surf,GREEN,Grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
 
 	if Grafo.selectedA:
 		Grafo.selectedA.Rect = pygame.draw.line(Surf,GREEN,Grafo.selectedA.t[0].Rect.center,Grafo.selectedA.t[1].Rect.center, LINE)
@@ -77,6 +78,20 @@ while not quitGame:
 		
 			#2 clicou no vazio
 			elif not local:
+				a=Grafo.selectedA
+				v=Grafo.selectedV
+				ra=None
+				rv=None
+				if v: 
+					pygame.draw.circle(SCREEN,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
+					rv = v.Rect
+				if a: 
+					pygame.draw.line(SCREEN, PINK, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
+					ra = a.Rect
+				pygame.display.update([rv, ra])
+				houveMudancas=False
+				Grafo.selectedA = None
+				Grafo.selectedV = None
 				continue
 
 			#2 botao esquerdo do mouse continua pressionado
@@ -118,9 +133,14 @@ while not quitGame:
 	#for end
 	
 	clock.tick(FPS)
+
 	if houveMudancas:
 		desenhar(SCREEN)
 		houveMudancas =False
+		if Grafo.conexo:
+			print "CONEXO"
+		else:
+			print "NAO conexo"
 
 	
 
