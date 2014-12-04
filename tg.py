@@ -9,6 +9,7 @@ class Grafo(object):
 	iTotalArestas=0
 	selectedV=None
 	selectedA=None
+	antigoRect=None
 	lDirtyRects = []
 		
 	@staticmethod
@@ -20,9 +21,10 @@ class Grafo(object):
 
 	@staticmethod
 	def removeArestasDoV(v):
-		for i, a in enumerate(Grafo.lArestas):
+		lcopia=Grafo.lArestas[:]
+		for a in lcopia:
 			if a.t[0].iID in v.setAdjs and a.t[1].iID in v.setAdjs:
-				Grafo.removeA(a,i)
+				Grafo.removeA(a)
 
 
 	@staticmethod
@@ -78,10 +80,10 @@ class Grafo(object):
 		return None
 
 	@staticmethod
-	def verificarDisclique(ponto):
+	def verificarDisclique(ponto ,id):
 
 		for vertice in Grafo.lVertices:
-			if vertice.Rect.collidepoint(ponto):
+			if vertice.Rect.collidepoint(ponto) and not vertice.iID == id:
 				Grafo.selectedV = vertice
 				return vertice
 
@@ -102,13 +104,10 @@ class Grafo(object):
 		return aresta
 
 	@staticmethod
-	def removeA(a, i=0):
+	def removeA(a):
 		a.t[0].setAdjs.discard(a.t[1].iID)
 		a.t[1].setAdjs.discard(a.t[0].iID)
-		if i:
-			del Grafo.lArestas[i]
-		else:
-			Grafo.lArestas.remove(a)
+		Grafo.lArestas.remove(a)
 		Grafo.iTotalArestas -= 1
 		Grafo.selectedA = None
 

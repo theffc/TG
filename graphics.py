@@ -7,6 +7,7 @@ BLUE = (0,100,255)
 PINK = (255,0,255)
 BLACK = (25,25,25)
 GREEN = (0,255,100)
+GRAY = (100,100,100)
 
 pygame.init()
 vidInfo = pygame.display.Info()
@@ -30,6 +31,9 @@ pygame.mouse.set_visible(1)
 def desenhar(Surf):
 	Surf.fill(BLACK)
 
+	if Grafo.antigoRect:
+		pygame.draw.circle(Surf, GRAY, Grafo.antigoRect.center, RECT_SIZE, LINE)
+
 	for v in Grafo.lVertices:
 		v.Rect = pygame.draw.circle(Surf,BLUE,v.Rect.center,RECT_SIZE, LINE)
 
@@ -41,6 +45,8 @@ def desenhar(Surf):
 
 	if Grafo.selectedA:
 		Grafo.selectedA.Rect = pygame.draw.line(Surf,GREEN,Grafo.selectedA.t[0].Rect.center,Grafo.selectedA.t[1].Rect.center, LINE)
+
+	pygame.display.update()
 #desenhar end
 
 #loop principal
@@ -73,31 +79,29 @@ while not quitGame:
 			elif not local:
 				continue
 
-
 			#2 botao esquerdo do mouse continua pressionado
-			elif Grafo.selectedV and pygame.mouse.get_pressed()[0] : 
-				
+			elif Grafo.selectedV and not Grafo.selectedA and pygame.mouse.get_pressed()[0] :
+				Grafo.antigoRect = local.Rect
 				#3 pegar o disclique
 				disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
 				while not disclique:
-					pygame.event.set_allowed(None)
-					pygame.event.set_allowed(pygame.MOUSEBUTTONUP)
-					disclique=pygame.event.wait()
-					print disclique
-				if isinstance(disclique, list):
-					disclique = disclique[0]
-				local2 = Grafo.verificarDisclique(disclique.pos)
+					disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
+					x,y = pygame.mouse.get_pos()
+					local.Rect=pygame.Rect(x-RECT_SIZE/2, y-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
+					desenhar(SCREEN)
+
+				if isinstance(disclique, list): disclique = disclique[0]
+				local2 = Grafo.verificarDisclique(disclique.pos, local.iID)
 				print local2
 
 				#3 desclicou num vertice para criar uma aresta
 				if isinstance(local2, Vertice):
+					local.Rect = Grafo.antigoRect
 					aresta = Grafo.newA(local, local2)
 					print Grafo.iTotalArestas
+
+				Grafo.antigoRect=None
 				
-				#3 desclicou no vazio-> Mover o rect do vertice
-				else:
-					local.Rect = pygame.Rect(disclique.pos[0]-RECT_SIZE/2, disclique.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
-					local.mostrar()
 
 		#1 keyboard click
 		elif event.type == pygame.KEYDOWN:
@@ -110,13 +114,12 @@ while not quitGame:
 
 		#1 pygame pega apenas eventos interesssantes
 		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
-
+		
 	#for end
 	
 	clock.tick(FPS)
 	if houveMudancas:
 		desenhar(SCREEN)
-		pygame.display.update()
 		houveMudancas =False
 
 	
