@@ -137,7 +137,7 @@ while not quitGame:
 	if houveMudancas:
 		desenhar(SCREEN)
 		houveMudancas =False
-		if Grafo.conexo:
+		if Grafo.bConexo:
 			print "CONEXO"
 		else:
 			print "NAO conexo"

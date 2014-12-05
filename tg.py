@@ -12,8 +12,8 @@ class Grafo(object):
 	selectedA=None
 	antigoRect=None
 	lDirtyRects = []
-	conexo = False
-	visited = {}
+	bConexo = False
+	dVisited = {}
 		
 	@staticmethod
 	def newV(Rect):
@@ -21,7 +21,7 @@ class Grafo(object):
 		Grafo.lVertices.append(v)
 		Grafo.iTotalVertices+=1
 		Grafo.selectedV = v
-		Grafo.conexo=False
+		Grafo.bConexo=False
 
 	@staticmethod
 	def removeArestasDoV(v):
@@ -36,14 +36,14 @@ class Grafo(object):
 		print ("entrei no removeV")
 		v = Grafo.selectedV
 
-		if len(v.setAdjs)>1:
+		if v.lAdjs:
 			Grafo.removeArestasDoV(v)
 
 		Grafo.lVertices.remove(v)
 		Grafo.iTotalVertices -= 1
 		Grafo.selectedV = None
 		Grafo.selectedA = None
-		Grafo.conexo = Grafo.ehConexo()
+		Grafo.ehConexo()
 
 		print ("sai do removeV")
 
@@ -104,27 +104,27 @@ class Grafo(object):
 	def newA(v1, v2):
 
 		# ja existe essa aresta
-		if v1.iID in v2.setAdjs:
+		if v1 in v2.lAdjs:
 			return None
 
 		aresta= Aresta(v1,v2)
 		Grafo.lArestas.append(aresta)
 		Grafo.iTotalArestas+=1
-		v1.setAdjs.add(v2.iID)
-		v2.setAdjs.add(v1.iID)
-		if not Grafo.conexo:
-			Grafo.conexo= Grafo.ehConexo()
+		v1.lAdjs.append(v2)
+		v2.lAdjs.append(v1)
+		if not Grafo.bConexo:
+			Grafo.ehConexo()
 		return aresta
 
 	@staticmethod
 	def removeA(a, v=0):
-		a.t[0].setAdjs.discard(a.t[1].iID)
-		a.t[1].setAdjs.discard(a.t[0].iID)
+		a.t[0].lAdjs.remove(a.t[1])
+		a.t[1].lAdjs.remove(a.t[0])
 		Grafo.lArestas.remove(a)
 		Grafo.iTotalArestas -= 1
 		Grafo.selectedA = None
 		if not v:
-			Grafo.conexo=Grafo.ehConexo()
+			Grafo.ehConexo()
 
 	@staticmethod
 	def mostrar():
@@ -133,34 +133,44 @@ class Grafo(object):
 
 
 	@staticmethod
-	def busca_profundidade(v=0):
-		visited[v.iID]=True
+	def busca_profundidade(v):
+		Grafo.dVisited[v.iID]=True
 
-   	if not v:
-        v=Grafo.lArestas[0]
-
-   	for x in v.lAdjs:
-        if not visited[x.iID]:
-            busca_profundidade(x)
+		for x in v.lAdjs:
+			if not x.iID in Grafo.dVisited:
+				Grafo.busca_profundidade(x)
 
 
 	@staticmethod
 	def ehConexo():
+		if Grafo.iTotalVertices==1:
+			Grafo.bConexo=True
+			return
+
+		if Grafo.iTotalArestas==0 or Grafo.iTotalVertices==0:
+			Grafo.bConexo = False
+			return
+
 		if Grafo.iTotalArestas < Grafo.iTotalVertices-1 :
-			return False
+			Grafo.bConexo = False
+			return
 
-		conjunto = set()
-		#conjunto.add(Grafo.lArestas[0].t[0].iID)
-		for a in Grafo.lArestas:
-			conjunto = a.t[0].setAdjs & a.t[1].setAdjs
-			if not conjunto:
-				return False
+		if Grafo.dVisited:
+			Grafo.dVisited.clear()
 
-		x=len(conjunto)
-		print ("Conjunto: ", x)
-		if x > 0:
-			return True		
-		return False
+		Grafo.busca_profundidade(Grafo.lVertices[0])
+
+		t=len(Grafo.dVisited)
+
+		print(Grafo.dVisited)
+		print("Total:", Grafo.iTotalVertices)
+		print("tamanho: ", t)
+
+		if t != Grafo.iTotalVertices:
+			Grafo.bConexo = False
+		else:
+			Grafo.bConexo = True
+
 
 
 class Vertice(object):
@@ -173,8 +183,8 @@ class Vertice(object):
 		self.Rect = Rect
 		self.iID = int( Vertice.iVid ) +1
 		Vertice.iVid += 1
-		self.setAdjs=set()
-		self.setAdjs.add(self.iID)
+		self.lAdjs=[]
+
 
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
