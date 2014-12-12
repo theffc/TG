@@ -50,6 +50,28 @@ def desenhar(Surf):
 	pygame.display.update()
 #desenhar end
 
+# desenha apenas o vertice e a aresta que foi passada
+def desenharPouco(v=None, a=None):
+	rv = None
+	ra = None
+	rsv = None
+	rsa = None
+
+	if v:
+		rv = pygame.draw.circle(SCREEN,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
+
+	if a:
+		ra = pygame.draw.line(SCREEN, PINK, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
+
+	if Grafo.selectedV:
+		rsv = pygame.draw.circle(SCREEN,GREEN,Grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
+
+	if Grafo.selectedA:
+		rsa = pygame.draw.line(SCREEN,GREEN,Grafo.selectedA.t[0].Rect.center,Grafo.selectedA.t[1].Rect.center, LINE)
+
+	pygame.display.update([rv, ra, rsv, rsa])
+#desenharPouco end
+
 #loop principal
 while not quitGame:
 	
@@ -63,40 +85,34 @@ while not quitGame:
 
 		#1 mouse click
 		elif event.type == pygame.MOUSEBUTTONDOWN:
-			houveMudancas = True 
 			local = Grafo.verificarClique(event.pos)
 			print local
 			clock.tick_busy_loop(FPS*0.1)
 
 			#2 doubleclick
 			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, Vertice):
+				houveMudancas = True
+				Grafo.selectedA = None
 				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE) 
-				Grafo.newV(Rect)
+				vertice=Grafo.newV(Rect)
 				Grafo.mostrar()
-				Grafo.selectedA=None
 				continue
 		
 			#2 clicou no vazio
 			elif not local:
+				houveMudancas=False
 				a=Grafo.selectedA
 				v=Grafo.selectedV
-				ra=None
-				rv=None
-				if v: 
-					pygame.draw.circle(SCREEN,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
-					rv = v.Rect
-				if a: 
-					pygame.draw.line(SCREEN, PINK, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
-					ra = a.Rect
-				pygame.display.update([rv, ra])
-				houveMudancas=False
 				Grafo.selectedA = None
 				Grafo.selectedV = None
+				desenharPouco(v, a)
 				continue
 
 			#2 botao esquerdo do mouse continua pressionado
 			elif Grafo.selectedV and not Grafo.selectedA and pygame.mouse.get_pressed()[0] :
 				Grafo.antigoRect = local.Rect
+				houveMudancas=True
+				
 				#3 pegar o disclique
 				disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
 				while not disclique:
@@ -111,28 +127,28 @@ while not quitGame:
 
 				#3 desclicou num vertice para criar uma aresta
 				if isinstance(local2, Vertice):
+					houveMudancas = True
 					local.Rect = Grafo.antigoRect
 					aresta = Grafo.newA(local, local2)
 					print Grafo.iTotalArestas
 
 				Grafo.antigoRect=None
-				
+
+			else:
+				houveMudancas=True
 
 		#1 keyboard click
 		elif event.type == pygame.KEYDOWN:
+			
+			#2 delete or bakspace
 			if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
 				houveMudancas = True
 				if Grafo.selectedA:
 					Grafo.removeA(Grafo.selectedA)
 				elif Grafo.selectedV:
 					Grafo.removeV()
-
-		#1 pygame pega apenas eventos interesssantes
-		pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN])
 		
 	#for end
-	
-	clock.tick(FPS)
 
 	if houveMudancas:
 		desenhar(SCREEN)
@@ -142,7 +158,7 @@ while not quitGame:
 		else:
 			print "NAO conexo"
 
-	
+	clock.tick(FPS)
 
 #while end
 

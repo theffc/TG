@@ -22,6 +22,7 @@ class Grafo(object):
 		Grafo.iTotalVertices+=1
 		Grafo.selectedV = v
 		Grafo.bConexo=False
+		return v
 
 	@staticmethod
 	def removeArestasDoV(v):
@@ -71,19 +72,25 @@ class Grafo(object):
 				Grafo.selectedA = None
 				return vertice
 		
+		lcopia = Grafo.lArestas[:]		
 		if Grafo.selectedV :
-			for aresta in Grafo.lArestas:			
+			for i, aresta in enumerate(lcopia):
 				if aresta.t[0].iID == Grafo.selectedV.iID or aresta.t[1].iID == Grafo.selectedV.iID:
 					if aresta.Rect.collidepoint(ponto):
 						if Grafo.selectedA == aresta:
+							del Grafo.lArestas[i]
+							Grafo.lArestas.append(aresta)
 							continue
 						Grafo.selectedA = aresta
 						return aresta
+			lcopia = Grafo.lArestas[:]
 
-		for aresta in Grafo.lArestas:
+		for i, aresta in enumerate(lcopia):
 			if aresta.Rect.collidepoint(ponto):
 				if Grafo.selectedA == aresta:
-						continue
+					del Grafo.lArestas[i]
+					Grafo.lArestas.append(aresta)
+					continue
 				Grafo.selectedA = aresta
 				Grafo.selectedV = None
 				return aresta
