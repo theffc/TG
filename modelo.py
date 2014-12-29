@@ -1,10 +1,10 @@
 from __future__ import print_function
-from pygame import display		
+from pygame import display	
 
 class Grafo(object):
 	"""docstring for Grafo"""
 
-	def __init__(self, data):
+	def __init__(self):
 		self.lVertices=[]
 		self.lArestas=[]
 		self.iTotalVertices=0
@@ -14,23 +14,30 @@ class Grafo(object):
 		self.antigoRect=None
 		self.lDirtyRects = []
 		self.bConexo = False
-		self.dVisited = {}
 		self.sNome = False
 		self.iVid=0
+		self.setVisited=set()
 
 	def newV(self, Rect):
 		v= Vertice(self, Rect)
 		self.lVertices.append(v)
 		self.iTotalVertices+=1
 		self.selectedV = v
-		self.bConexo=False
+		
+		if self.iTotalVertices == 1:
+			self.bConexo = True
+		else:
+			self.bConexo=False
+
+		for a in self.lArestas:
+			a.pertenceArvore=False
 		return v
 
 	def removeArestasDoV(self, v):
 		lcopia=self.lArestas[:]
 		for a in lcopia:
 			if a.t[0].iID == v.iID or a.t[1].iID == v.iID:
-				self.removeA(a, v)
+				self.removeA(a, verificar=False)
 
 
 	def removeV(self):
@@ -44,7 +51,7 @@ class Grafo(object):
 		self.iTotalVertices -= 1
 		self.selectedV = None
 		self.selectedA = None
-		self.ehConexo()
+		self.gerarArvore()
 
 		print ("sai do removeV")
 
@@ -103,7 +110,7 @@ class Grafo(object):
 
 		return None
 
-	def newA(self, v1, v2):
+	def newA(self, v1, v2, verificar=True):
 
 		# ja existe essa aresta
 		if v1 in v2.lAdjs:
@@ -114,18 +121,19 @@ class Grafo(object):
 		self.iTotalArestas+=1
 		v1.lAdjs.append(v2)
 		v2.lAdjs.append(v1)
-		if not self.bConexo:
-			self.ehConexo()
+		if verificar and not self.bConexo:
+			self.gerarArvore()
+
 		return aresta
 
-	def removeA(self, a, v=0):
+	def removeA(self, a, verificar=True):
 		a.t[0].lAdjs.remove(a.t[1])
 		a.t[1].lAdjs.remove(a.t[0])
 		self.lArestas.remove(a)
 		self.iTotalArestas -= 1
 		self.selectedA = None
-		if not v:
-			self.ehConexo()
+		if verificar and a.pertenceArvore:
+			self.gerarArvore()
 
 	def mostrar(self):
 		self.mostrarV()
@@ -133,14 +141,16 @@ class Grafo(object):
 
 
 	def busca_profundidade(self, v):
-		self.dVisited[v.iID]=True
+		
+		self.setVisited.add(v.iID)
 
 		for x in v.lAdjs:
-			if not x.iID in self.dVisited:
+			if not x.iID in self.setVisited:
 				self.busca_profundidade(x)
 
 
 	def ehConexo(self):
+		
 		if self.iTotalVertices==1:
 			self.bConexo=True
 			return
@@ -153,14 +163,13 @@ class Grafo(object):
 			self.bConexo = False
 			return
 
-		if self.dVisited:
-			self.dVisited.clear()
+		self.setVisited= set()
 
 		self.busca_profundidade(self.lVertices[0])
 
-		t=len(self.dVisited)
+		t=len(self.setVisited)
 
-		print(self.dVisited)
+		print(self.setVisited)
 		print("Total:", self.iTotalVertices)
 		print("tamanho: ", t)
 
@@ -168,6 +177,34 @@ class Grafo(object):
 			self.bConexo = False
 		else:
 			self.bConexo = True
+
+
+	def gerarArvore(self):
+
+		self.ehConexo()
+
+		if not self.bConexo:
+			for a in self.lArestas:
+				a.pertenceArvore=False
+			return
+
+		copia = self.lArestas[:]
+		lArestasRemovidas = []
+
+		for a in copia:
+			self.removeA(a, verificar=False)
+			self.ehConexo()
+			if not self.bConexo:
+				a=self.newA(a.t[0], a.t[1], verificar=False)
+				a.pertenceArvore=True
+			else:
+				lArestasRemovidas.append(a)
+
+		for a in lArestasRemovidas:
+			a=self.newA(a.t[0], a.t[1], verificar=False)
+			a.pertenceArvore=False
+
+		self.bConexo = True
 
 
 
@@ -195,7 +232,7 @@ class Aresta(object):
 		super(Aresta, self).__init__()
 		self.Rect = v1.Rect.union(v2.Rect)
 		self.t = (v1, v2)
-		self.fazParteDaArvore=False
+		self.pertenceArvore=False
 		
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
