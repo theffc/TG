@@ -4,192 +4,181 @@ from pygame import display
 class Grafo(object):
 	"""docstring for Grafo"""
 
-	lVertices=[]
-	lArestas=[]
-	iTotalVertices=0
-	iTotalArestas=0
-	selectedV=None
-	selectedA=None
-	antigoRect=None
-	lDirtyRects = []
-	bConexo = False
-	dVisited = {}
-		
-	@staticmethod
-	def newV(Rect):
-		v= Vertice(Rect)
-		Grafo.lVertices.append(v)
-		Grafo.iTotalVertices+=1
-		Grafo.selectedV = v
-		Grafo.bConexo=False
+	def __init__(self, data):
+		self.lVertices=[]
+		self.lArestas=[]
+		self.iTotalVertices=0
+		self.iTotalArestas=0
+		self.selectedV=None
+		self.selectedA=None
+		self.antigoRect=None
+		self.lDirtyRects = []
+		self.bConexo = False
+		self.dVisited = {}
+		self.sNome = False
+		self.iVid=0
+
+	def newV(self, Rect):
+		v= Vertice(self, Rect)
+		self.lVertices.append(v)
+		self.iTotalVertices+=1
+		self.selectedV = v
+		self.bConexo=False
 		return v
 
-	@staticmethod
-	def removeArestasDoV(v):
-		lcopia=Grafo.lArestas[:]
+	def removeArestasDoV(self, v):
+		lcopia=self.lArestas[:]
 		for a in lcopia:
 			if a.t[0].iID == v.iID or a.t[1].iID == v.iID:
-				Grafo.removeA(a, v)
+				self.removeA(a, v)
 
 
-	@staticmethod
-	def removeV():
+	def removeV(self):
 		print ("entrei no removeV")
-		v = Grafo.selectedV
+		v = self.selectedV
 
 		if v.lAdjs:
-			Grafo.removeArestasDoV(v)
+			self.removeArestasDoV(v)
 
-		Grafo.lVertices.remove(v)
-		Grafo.iTotalVertices -= 1
-		Grafo.selectedV = None
-		Grafo.selectedA = None
-		Grafo.ehConexo()
+		self.lVertices.remove(v)
+		self.iTotalVertices -= 1
+		self.selectedV = None
+		self.selectedA = None
+		self.ehConexo()
 
 		print ("sai do removeV")
 
-	@staticmethod
-	def mostrarV():
+	def mostrarV(self):
 		print('[ VERTICES')	
-		for x in Grafo.lVertices:
+		for x in self.lVertices:
 			x.mostrar()
 		print('VERTICES ]')
 
 
-	@staticmethod
-	def mostrarA():
+	def mostrarA(self):
 		print('[ ARESTAS')	
-		for x in Grafo.lArestas:
+		for x in self.lArestas:
 			x.mostrar()
 		print('ARESTAS ]')
 
-	@staticmethod
-	def verificarClique(ponto):
+	def verificarClique(self, ponto):
 
-		for vertice in Grafo.lVertices:
+		for vertice in self.lVertices:
 			if vertice.Rect.collidepoint(ponto):
-				Grafo.selectedV = vertice
-				Grafo.selectedA = None
+				self.selectedV = vertice
+				self.selectedA = None
 				return vertice
 		
-		lcopia = Grafo.lArestas[:]		
-		if Grafo.selectedV :
+		lcopia = self.lArestas[:]		
+		if self.selectedV :
 			for i, aresta in enumerate(lcopia):
-				if aresta.t[0].iID == Grafo.selectedV.iID or aresta.t[1].iID == Grafo.selectedV.iID:
+				if aresta.t[0].iID == self.selectedV.iID or aresta.t[1].iID == self.selectedV.iID:
 					if aresta.Rect.collidepoint(ponto):
-						if Grafo.selectedA == aresta:
-							del Grafo.lArestas[i]
-							Grafo.lArestas.append(aresta)
+						if self.selectedA == aresta:
+							del self.lArestas[i]
+							self.lArestas.append(aresta)
 							continue
-						Grafo.selectedA = aresta
+						self.selectedA = aresta
 						return aresta
-			lcopia = Grafo.lArestas[:]
+			lcopia = self.lArestas[:]
 
 		for i, aresta in enumerate(lcopia):
 			if aresta.Rect.collidepoint(ponto):
-				if Grafo.selectedA == aresta:
-					del Grafo.lArestas[i]
-					Grafo.lArestas.append(aresta)
+				if self.selectedA == aresta:
+					del self.lArestas[i]
+					self.lArestas.append(aresta)
 					continue
-				Grafo.selectedA = aresta
-				Grafo.selectedV = None
+				self.selectedA = aresta
+				self.selectedV = None
 				return aresta
 
 		return None
 
-	@staticmethod
-	def verificarDisclique(ponto ,id):
+	def verificarDisclique(self, ponto ,id):
 
-		for vertice in Grafo.lVertices:
+		for vertice in self.lVertices:
 			if vertice.Rect.collidepoint(ponto) and not vertice.iID == id:
-				Grafo.selectedV = vertice
+				self.selectedV = vertice
 				return vertice
 
 		return None
 
-	@staticmethod
-	def newA(v1, v2):
+	def newA(self, v1, v2):
 
 		# ja existe essa aresta
 		if v1 in v2.lAdjs:
 			return None
 
 		aresta= Aresta(v1,v2)
-		Grafo.lArestas.append(aresta)
-		Grafo.iTotalArestas+=1
+		self.lArestas.append(aresta)
+		self.iTotalArestas+=1
 		v1.lAdjs.append(v2)
 		v2.lAdjs.append(v1)
-		if not Grafo.bConexo:
-			Grafo.ehConexo()
+		if not self.bConexo:
+			self.ehConexo()
 		return aresta
 
-	@staticmethod
-	def removeA(a, v=0):
+	def removeA(self, a, v=0):
 		a.t[0].lAdjs.remove(a.t[1])
 		a.t[1].lAdjs.remove(a.t[0])
-		Grafo.lArestas.remove(a)
-		Grafo.iTotalArestas -= 1
-		Grafo.selectedA = None
+		self.lArestas.remove(a)
+		self.iTotalArestas -= 1
+		self.selectedA = None
 		if not v:
-			Grafo.ehConexo()
+			self.ehConexo()
 
-	@staticmethod
-	def mostrar():
-		Grafo.mostrarV()
-		Grafo.mostrarA()
+	def mostrar(self):
+		self.mostrarV()
+		self.mostrarA()
 
 
-	@staticmethod
-	def busca_profundidade(v):
-		Grafo.dVisited[v.iID]=True
+	def busca_profundidade(self, v):
+		self.dVisited[v.iID]=True
 
 		for x in v.lAdjs:
-			if not x.iID in Grafo.dVisited:
-				Grafo.busca_profundidade(x)
+			if not x.iID in self.dVisited:
+				self.busca_profundidade(x)
 
 
-	@staticmethod
-	def ehConexo():
-		if Grafo.iTotalVertices==1:
-			Grafo.bConexo=True
+	def ehConexo(self):
+		if self.iTotalVertices==1:
+			self.bConexo=True
 			return
 
-		if Grafo.iTotalArestas==0 or Grafo.iTotalVertices==0:
-			Grafo.bConexo = False
+		if self.iTotalArestas==0 or self.iTotalVertices==0:
+			self.bConexo = False
 			return
 
-		if Grafo.iTotalArestas < Grafo.iTotalVertices-1 :
-			Grafo.bConexo = False
+		if self.iTotalArestas < self.iTotalVertices-1 :
+			self.bConexo = False
 			return
 
-		if Grafo.dVisited:
-			Grafo.dVisited.clear()
+		if self.dVisited:
+			self.dVisited.clear()
 
-		Grafo.busca_profundidade(Grafo.lVertices[0])
+		self.busca_profundidade(self.lVertices[0])
 
-		t=len(Grafo.dVisited)
+		t=len(self.dVisited)
 
-		print(Grafo.dVisited)
-		print("Total:", Grafo.iTotalVertices)
+		print(self.dVisited)
+		print("Total:", self.iTotalVertices)
 		print("tamanho: ", t)
 
-		if t != Grafo.iTotalVertices:
-			Grafo.bConexo = False
+		if t != self.iTotalVertices:
+			self.bConexo = False
 		else:
-			Grafo.bConexo = True
+			self.bConexo = True
 
 
 
 class Vertice(object):
 	"""docstring for Vertice"""
 
-	iVid=0
-
-	def __init__(self, Rect):
+	def __init__(self, Grafo, Rect):
 		super(Vertice, self).__init__()
 		self.Rect = Rect
-		self.iID = int( Vertice.iVid ) +1
-		Vertice.iVid += 1
+		self.iID = int( Grafo.iVid ) +1
+		Grafo.iVid += 1
 		self.lAdjs=[]
 
 
