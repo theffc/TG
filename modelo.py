@@ -12,11 +12,11 @@ class Grafo(object):
 		self.selectedV=None
 		self.selectedA=None
 		self.antigoRect=None
-		self.lDirtyRects = []
-		self.bConexo = False
+		self.bConexo = 0
 		self.sNome = False
 		self.iVid=0
 		self.setVisited=set()
+		self.contador = 0
 
 	def newV(self, Rect):
 		v= Vertice(self, Rect)
@@ -112,16 +112,26 @@ class Grafo(object):
 
 	def newA(self, v1, v2, verificar=True):
 
-		# ja existe essa aresta
-		if v1 in v2.lAdjs:
+		if v1.iID == v2.iID:
+			self.contador = self.contador +1
 			return None
 
+		# ja existe essa aresta
+		for v in v2.lAdjs:
+			if v.iID == v1.iID:
+				self.contador = self.contador +1
+				return None
+
+		self.contador = self.contador +1
 		aresta= Aresta(v1,v2)
 		self.lArestas.append(aresta)
 		self.iTotalArestas+=1
 		v1.lAdjs.append(v2)
 		v2.lAdjs.append(v1)
-		if verificar and not self.bConexo:
+		
+		if self.bConexo:
+			self.bConexo = self.bConexo+1
+		elif verificar:
 			self.gerarArvore()
 
 		return aresta
@@ -134,6 +144,8 @@ class Grafo(object):
 		self.selectedA = None
 		if verificar and a.pertenceArvore:
 			self.gerarArvore()
+		else:
+			self.bConexo = self.bConexo-1
 
 	def mostrar(self):
 		self.mostrarV()
@@ -152,15 +164,19 @@ class Grafo(object):
 	def ehConexo(self):
 		
 		if self.iTotalVertices==1:
-			self.bConexo=True
+			self.bConexo=1
 			return
 
 		if self.iTotalArestas==0 or self.iTotalVertices==0:
-			self.bConexo = False
+			self.bConexo = 0
 			return
 
 		if self.iTotalArestas < self.iTotalVertices-1 :
-			self.bConexo = False
+			self.bConexo = 0
+			return
+
+		if self.iTotalArestas == (self.iTotalVertices*(self.iTotalVertices-1)/2):
+			self.bConexo = self.iTotalVertices
 			return
 
 		self.setVisited= set()
@@ -170,23 +186,25 @@ class Grafo(object):
 		t=len(self.setVisited)
 
 		print(self.setVisited)
-		print("Total:", self.iTotalVertices)
+		print("Vertices:", self.iTotalVertices)
 		print("tamanho: ", t)
 
 		if t != self.iTotalVertices:
-			self.bConexo = False
+			self.bConexo = 0
 		else:
-			self.bConexo = True
+			self.bConexo = -1
 
 
 	def gerarArvore(self):
 
 		self.ehConexo()
-
+		
 		if not self.bConexo:
 			for a in self.lArestas:
 				a.pertenceArvore=False
 			return
+
+		contador = 1
 
 		copia = self.lArestas[:]
 		lArestasRemovidas = []
@@ -195,16 +213,33 @@ class Grafo(object):
 			self.removeA(a, verificar=False)
 			self.ehConexo()
 			if not self.bConexo:
-				a=self.newA(a.t[0], a.t[1], verificar=False)
-				a.pertenceArvore=True
+				x=self.newA(a.t[0], a.t[1], verificar=False)
+				x.pertenceArvore=True
 			else:
 				lArestasRemovidas.append(a)
 
 		for a in lArestasRemovidas:
-			a=self.newA(a.t[0], a.t[1], verificar=False)
-			a.pertenceArvore=False
+			self.newA(a.t[0], a.t[1], verificar=False)
+			contador = contador+1
 
-		self.bConexo = True
+		self.bConexo = contador
+		print(contador, "-Conexo")
+
+
+	def completar(self):
+		if(self.iTotalVertices * (self.iTotalVertices-1)/2) == self.iTotalArestas:
+			self.gerarArvore()
+			return
+
+		self.contador = 0
+
+		for v1 in self.lVertices:
+			for v2 in self.lVertices:
+				self.newA(v1, v2, verificar=False)
+
+		print("Fez o newA ", self.contador)
+
+		self.gerarArvore()
 
 
 

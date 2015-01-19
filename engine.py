@@ -97,6 +97,12 @@ while not quitGame:
 					grafo.removeV()
 					houveMudancas = True
 
+			#2 ctrl+C
+			#		completar o grafo, criando arestas entre todos os vertices
+			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and (teclas[pygame.K_c]):
+				grafo.completar()
+				houveMudancas=True
+
 			#2 ctrl+shift+S
 			#		salvar o grafo em um novo arquivo
 			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and (teclas[pygame.K_RSHIFT] or teclas[pygame.K_LSHIFT]) and teclas[pygame.K_s]:
@@ -109,7 +115,7 @@ while not quitGame:
 
 
 			#2 ctrl+S
-			# 	salvar as mudanças
+			# 	salvar as mudancas
 			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and teclas[pygame.K_s]:
 				houveMudancas=False
 				if grafo.sNome:

@@ -21,7 +21,8 @@ PINK = (255,0,255)
 BLACK = (25,25,25)
 GREEN = (0,255,100)
 ORANGE = (255, 120, 30)
-GRAY = (20, 20, 20)
+GRAY = (100,100,100)
+WHITE = (255,255,255)
 
 def getRectSize():
 	return RECT_SIZE
@@ -50,12 +51,19 @@ def desenhar(grafo):
 	if grafo.selectedA:
 		grafo.selectedA.Rect = pygame.draw.line(SCREEN,GREEN,grafo.selectedA.t[0].Rect.center,grafo.selectedA.t[1].Rect.center, LINE)
 
+	for v in grafo.lVertices:
+		sVid = str(v.iID)
+		textSurf = TEXTO.render(sVid, 1, WHITE )
+		SCREEN.blit(textSurf, v.Rect.center)
+
 	if grafo.bConexo:
-		textSurf = TEXTO.render("CONEXO",1, ORANGE)
+		texto = str(grafo.bConexo) + "-CONEXO"
+		textSurf = TEXTO.render(texto,1, ORANGE)
 	else:
 		textSurf = TEXTO.render("NAO conexo",1, PINK)
-
 	SCREEN.blit(textSurf, (10,10))
+
+
 
 	pygame.display.update()
 #desenhar end
