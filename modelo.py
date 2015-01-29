@@ -1,4 +1,4 @@
-from __future__ import print_function
+import random
 from pygame import display	
 
 class Grafo(object):
@@ -12,11 +12,12 @@ class Grafo(object):
 		self.selectedV=None
 		self.selectedA=None
 		self.antigoRect=None
-		self.bConexo = 0
+		self.iConexo = 0
 		self.sNome = False
 		self.iVid=0
 		self.setVisited=set()
 		self.contador = 0
+		self.menorV = None #referencia ao vertice de menor grau
 
 	def newV(self, Rect):
 		v= Vertice(self, Rect)
@@ -25,9 +26,9 @@ class Grafo(object):
 		self.selectedV = v
 		
 		if self.iTotalVertices == 1:
-			self.bConexo = True
+			self.iConexo = True
 		else:
-			self.bConexo=False
+			self.iConexo=False
 
 		for a in self.lArestas:
 			a.pertenceArvore=False
@@ -129,8 +130,8 @@ class Grafo(object):
 		v1.lAdjs.append(v2)
 		v2.lAdjs.append(v1)
 		
-		if self.bConexo:
-			self.bConexo = self.bConexo+1
+		if self.iConexo:
+			self.iConexo = self.getMenorGrau()
 		elif verificar:
 			self.gerarArvore()
 
@@ -145,7 +146,7 @@ class Grafo(object):
 		if verificar and a.pertenceArvore:
 			self.gerarArvore()
 		else:
-			self.bConexo = self.bConexo-1
+			self.iConexo = self.getMenorGrau()
 
 	def mostrar(self):
 		self.mostrarV()
@@ -164,19 +165,19 @@ class Grafo(object):
 	def ehConexo(self):
 		
 		if self.iTotalVertices==1:
-			self.bConexo=1
+			self.iConexo=1
 			return
 
 		if self.iTotalArestas==0 or self.iTotalVertices==0:
-			self.bConexo = 0
+			self.iConexo = 0
 			return
 
 		if self.iTotalArestas < self.iTotalVertices-1 :
-			self.bConexo = 0
+			self.iConexo = 0
 			return
 
 		if self.iTotalArestas == (self.iTotalVertices*(self.iTotalVertices-1)/2):
-			self.bConexo = self.iTotalVertices
+			self.iConexo = self.iTotalVertices
 			return
 
 		self.setVisited= set()
@@ -185,34 +186,34 @@ class Grafo(object):
 
 		t=len(self.setVisited)
 
-		print(self.setVisited)
-		print("Vertices:", self.iTotalVertices)
-		print("tamanho: ", t)
+		# print(self.setVisited)
+		# print("Vertices:", self.iTotalVertices)
+		# print("tamanho: ", t)
 
 		if t != self.iTotalVertices:
-			self.bConexo = 0
+			self.iConexo = 0
 		else:
-			self.bConexo = -1
+			self.iConexo = -1
 
 
 	def gerarArvore(self):
 
 		self.ehConexo()
 		
-		if not self.bConexo:
+		if not self.iConexo:
 			for a in self.lArestas:
 				a.pertenceArvore=False
 			return
 
 		contador = 1
 
-		copia = self.lArestas[:]
+		copia = random.sample(self.lArestas, len(self.lArestas))
 		lArestasRemovidas = []
 
 		for a in copia:
 			self.removeA(a, verificar=False)
 			self.ehConexo()
-			if not self.bConexo:
+			if not self.iConexo:
 				x=self.newA(a.t[0], a.t[1], verificar=False)
 				x.pertenceArvore=True
 			else:
@@ -222,8 +223,21 @@ class Grafo(object):
 			self.newA(a.t[0], a.t[1], verificar=False)
 			contador = contador+1
 
-		self.bConexo = contador
-		print(contador, "-Conexo")
+		grauMinimo = self.getMenorGrau()
+
+		if contador < grauMinimo:
+			self.iConexo = contador
+		else:
+			self.iConexo = grauMinimo
+
+	def getMenorGrau(self):
+		iGrauMinimo = len(self.lVertices[0].lAdjs)
+		for v in self.lVertices:
+			grau = len(v.lAdjs)
+			if grau < iGrauMinimo:
+				iGrauMinimo = grau
+
+		return iGrauMinimo
 
 
 	def completar(self):

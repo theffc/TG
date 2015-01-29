@@ -1,4 +1,4 @@
-import tkFileDialog
+import tkinter.filedialog as tk
 import os.path
 import pygame
 import random
@@ -56,8 +56,8 @@ def desenhar(grafo):
 		textSurf = TEXTO.render(sVid, 1, WHITE )
 		SCREEN.blit(textSurf, v.Rect.center)
 
-	if grafo.bConexo:
-		texto = str(grafo.bConexo) + "-CONEXO"
+	if grafo.iConexo:
+		texto = str(grafo.iConexo) + "-CONEXO"
 		textSurf = TEXTO.render(texto,1, ORANGE)
 	else:
 		textSurf = TEXTO.render("NAO conexo",1, PINK)
@@ -96,11 +96,11 @@ def desenharPouco(grafo, v=None, a=None):
 
 
 def saveFileAs():
-	f = tkFileDialog.asksaveasfile(mode='w', filetypes=[('graph files', '*.ffc')], defaultextension='.ffc', initialdir=os.path.join(os.path.dirname(__file__), 'saved'), initialfile=random.randint(1,999), title='Choose where to save your graph')
+	f = tk.asksaveasfile(mode='wb', filetypes=[('graph files', '*.ffc')], defaultextension='.ffc', initialdir=os.path.join(os.path.dirname(__file__), 'saved'), initialfile=random.randint(1,999), title='Choose where to save your graph')
 	
 	return f
 
 def openFile():
-	f = tkFileDialog.askopenfile(mode='r', filetypes=[('graph files', '*.ffc')], defaultextension='.ffc', initialdir=os.path.join(os.path.dirname(__file__), 'saved'), title='Choose which graph you want to open' )
+	f = tk.askopenfile(mode='rb', filetypes=[('graph files', '*.ffc')], defaultextension='.ffc', initialdir=os.path.join(os.path.dirname(__file__), 'saved'), title='Choose which graph you want to open' )
 
 	return f

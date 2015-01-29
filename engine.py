@@ -32,7 +32,7 @@ while not quitGame:
 		#1 mouse click
 		elif event.type == pygame.MOUSEBUTTONDOWN:
 			local = grafo.verificarClique(event.pos)
-			print local
+			print (local)
 			clock.tick_busy_loop(FPS*0.1)
 
 			#2 doubleclick
@@ -69,14 +69,14 @@ while not quitGame:
 
 				if isinstance(disclique, list): disclique = disclique[0]
 				local2 = grafo.verificarDisclique(disclique.pos, local.iID)
-				print local2
+				print (local2)
 
 				#3 desclicou num vertice para criar uma aresta
 				if isinstance(local2, modelo.Vertice):
 					houveMudancas = True
 					local.Rect = grafo.antigoRect
 					aresta = grafo.newA(local, local2)
-					print grafo.iTotalArestas
+					print (grafo.iTotalArestas)
 
 				grafo.antigoRect=None
 
@@ -119,7 +119,7 @@ while not quitGame:
 			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and teclas[pygame.K_s]:
 				houveMudancas=False
 				if grafo.sNome:
-					f = open(grafo.sNome, mode='w')
+					f = open(grafo.sNome, mode='wb')
 					if f:
 						pickle.dump(grafo, f)
 						f.close()
@@ -127,6 +127,7 @@ while not quitGame:
 					f = gui.saveFileAs()
 					if f:
 						grafo.sNome = f.name
+						print(f.name)
 						pickle.dump(grafo, f)
 						f.close()
 
