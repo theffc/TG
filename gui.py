@@ -17,15 +17,27 @@ SCREEN = pygame.display.set_mode(RESOLUTION, pygame.RESIZABLE)#, pygame.FULLSCRE
 TEXTO = pygame.font.Font(None, 30)
 
 BLUE = (10,100,255)
-PINK = (255,0,255)
+PINK = 	(240,10,240)
 BLACK = (25,25,25)
-GREEN = (0,255,100)
+GREEN = (20,255,100)
 ORANGE = (255, 120, 30)
 GRAY = (100,100,100)
 WHITE = (255,255,255)
+LIGHTGRAY = (112,128,144)
 
-def getRectSize():
-	return RECT_SIZE
+FOREST = (34,139,34)
+YELLOW = (255,250,80)
+RED = (255,80,80)
+PURPLE = (115,100,235)
+AQUAMARINE = (127,255,212)
+BROWN = (139,69,19)
+BEJE = (255,222,173)
+TURQUESA = (95,158,160)
+SALMON = (250,128,114)
+OLIVE = (128,128,0)
+SAND = (244,164,96)
+
+lCores = [BLUE,FOREST,YELLOW,RED,PURPLE,AQUAMARINE,BROWN,BEJE,TURQUESA,SALMON,OLIVE,SAND]
 
 # desenha todas as coisas na tela
 def desenhar(grafo):
@@ -35,13 +47,13 @@ def desenhar(grafo):
 		pygame.draw.circle(SCREEN, GRAY, grafo.antigoRect.center, RECT_SIZE, CIRCLE)
 
 	for v in grafo.lVertices:
-		v.Rect = pygame.draw.circle(SCREEN,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
+		v.Rect = pygame.draw.circle(SCREEN,lCores[v.cor],v.Rect.center,RECT_SIZE, CIRCLE)
 
 	for a in grafo.lArestas:
 		if a.pertenceArvore:
 			cor = ORANGE
 		else:
-			cor = PINK
+			cor = LIGHTGRAY
 		
 		a.Rect = pygame.draw.line(SCREEN, cor, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
 
@@ -76,7 +88,7 @@ def desenharPouco(grafo, v=None, a=None):
 	rsa = None
 
 	if v:
-		rv = pygame.draw.circle(SCREEN,BLUE,v.Rect.center,RECT_SIZE, CIRCLE)
+		rv = pygame.draw.circle(SCREEN,lCores[v.cor],v.Rect.center,RECT_SIZE, CIRCLE)
 
 	if a:
 		if a.pertenceArvore:

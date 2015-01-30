@@ -1,10 +1,11 @@
 import pygame
 import time # time.strftime("%d %b %Y")
 import pickle
+import random
 
 import gui
-import modelo
-from gui import RECT_SIZE
+import model
+import functions
 
 FPS=50
 quitGame=False
@@ -16,7 +17,7 @@ pygame.event.set_blocked([pygame.USEREVENT, pygame.VIDEOEXPOSE, pygame.MOUSEMOTI
 houveMudancas = True
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(1)
-grafo = modelo.Grafo()
+grafo = model.Grafo()
 
 #loop principal
 while not quitGame:
@@ -36,10 +37,10 @@ while not quitGame:
 			clock.tick_busy_loop(FPS*0.1)
 
 			#2 doubleclick
-			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, modelo.Vertice):
+			if pygame.event.get(pygame.MOUSEBUTTONDOWN) and not isinstance(local, model.Vertice):
 				houveMudancas = True
 				grafo.selectedA = None
-				Rect = pygame.Rect(event.pos[0]-RECT_SIZE/2, event.pos[1]-RECT_SIZE/2, RECT_SIZE, RECT_SIZE) 
+				Rect = pygame.Rect(event.pos[0]-gui.RECT_SIZE/2, event.pos[1]-gui.RECT_SIZE/2, gui.RECT_SIZE, gui.RECT_SIZE) 
 				vertice=grafo.newV(Rect)
 				grafo.mostrar()
 				continue
@@ -64,7 +65,7 @@ while not quitGame:
 				while not disclique:
 					disclique = pygame.event.get(pygame.MOUSEBUTTONUP)
 					x,y = pygame.mouse.get_pos()
-					local.Rect=pygame.Rect(x-RECT_SIZE/2, y-RECT_SIZE/2, RECT_SIZE, RECT_SIZE)
+					local.Rect=pygame.Rect(x-gui.RECT_SIZE/2, y-gui.RECT_SIZE/2, gui.RECT_SIZE, gui.RECT_SIZE)
 					gui.desenhar(grafo)
 
 				if isinstance(disclique, list): disclique = disclique[0]
@@ -72,7 +73,7 @@ while not quitGame:
 				print (local2)
 
 				#3 desclicou num vertice para criar uma aresta
-				if isinstance(local2, modelo.Vertice):
+				if isinstance(local2, model.Vertice):
 					houveMudancas = True
 					local.Rect = grafo.antigoRect
 					aresta = grafo.newA(local, local2)
@@ -106,10 +107,11 @@ while not quitGame:
 			#2 ctrl+shift+S
 			#		salvar o grafo em um novo arquivo
 			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and (teclas[pygame.K_RSHIFT] or teclas[pygame.K_LSHIFT]) and teclas[pygame.K_s]:
-				houveMudancas=False
+				houveMudancas=True
 				f = gui.saveFileAs()
 				if f:
 					grafo.sNome = f.name
+					grafo.prepareToSave()
 					pickle.dump(grafo, f)
 					f.close()
 
@@ -117,15 +119,17 @@ while not quitGame:
 			#2 ctrl+S
 			# 	salvar as mudancas
 			elif (teclas[pygame.K_RCTRL] or teclas[pygame.K_LCTRL]) and teclas[pygame.K_s]:
-				houveMudancas=False
+				houveMudancas=True
 				if grafo.sNome:
 					f = open(grafo.sNome, mode='wb')
 					if f:
+						grafo.prepareToSave()
 						pickle.dump(grafo, f)
 						f.close()
 				else:
 					f = gui.saveFileAs()
 					if f:
+						grafo.prepareToSave()
 						grafo.sNome = f.name
 						print(f.name)
 						pickle.dump(grafo, f)
@@ -139,6 +143,16 @@ while not quitGame:
 				if f:
 					grafo = pickle.load(f)
 					f.close()
+
+			elif teclas[pygame.K_j]:
+				houveMudancas = True
+				functions.colorirVertices(random.sample(grafo.lVertices, len(grafo.lVertices)))
+
+			elif teclas[pygame.K_k]:
+				houveMudancas=True
+				x=sorted(grafo.lVertices, key=lambda v: len(v.lAdjs), reverse=True)
+				print(x)
+				functions.colorirVertices(x)
 				
 	#for end
 

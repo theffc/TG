@@ -1,6 +1,40 @@
 import random
 from pygame import display	
 
+
+class Vertice(object):
+	"""docstring for Vertice"""
+
+	def __init__(self, Grafo, Rect):
+		super(Vertice, self).__init__()
+		self.Rect = Rect
+		self.iID = int( Grafo.iVid ) +1
+		Grafo.iVid += 1
+		self.lAdjs=[]
+		self.cor=0
+
+
+	def mostrar(self):
+		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
+		print(self.iID, self.Rect.center, sep=' - ')
+		
+		
+
+class Aresta(object):
+	"""docstring for Aresta"""
+
+	def __init__(self, v1, v2):
+		super(Aresta, self).__init__()
+		self.Rect = v1.Rect.union(v2.Rect)
+		self.t = (v1, v2)
+		self.pertenceArvore=False
+		
+	def mostrar(self):
+		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
+		print("(", self.Rect.center,' )')	
+
+
+
 class Grafo(object):
 	"""docstring for Grafo"""
 
@@ -9,15 +43,13 @@ class Grafo(object):
 		self.lArestas=[]
 		self.iTotalVertices=0
 		self.iTotalArestas=0
-		self.selectedV=None
-		self.selectedA=None
-		self.antigoRect=None
-		self.iConexo = 0
-		self.sNome = False
-		self.iVid=0
-		self.setVisited=set()
-		self.contador = 0
-		self.menorV = None #referencia ao vertice de menor grau
+		self.selectedV=None # referencia ao Vertice selecionado
+		self.selectedA=None # referencia a Aresta selecionada
+		self.antigoRect=None # usado apenas para printar a bolinha cinza quando o usuario estiver mudando um vertice de lugar
+		self.iConexo = 0 # inteiro que representa a K-conectividade do grafo
+		self.sNome = False # Path do arquivo em que o grafo esta salvo
+		self.iVid=0 # inteiro usado para diferenciar vertices
+		self.setVisited=set() # conjunto de ids de vertices usado na busca em profundidade
 
 	def newV(self, Rect):
 		v= Vertice(self, Rect)
@@ -26,9 +58,9 @@ class Grafo(object):
 		self.selectedV = v
 		
 		if self.iTotalVertices == 1:
-			self.iConexo = True
+			self.iConexo = 1
 		else:
-			self.iConexo=False
+			self.iConexo = 0
 
 		for a in self.lArestas:
 			a.pertenceArvore=False
@@ -114,16 +146,13 @@ class Grafo(object):
 	def newA(self, v1, v2, verificar=True):
 
 		if v1.iID == v2.iID:
-			self.contador = self.contador +1
 			return None
 
 		# ja existe essa aresta
 		for v in v2.lAdjs:
 			if v.iID == v1.iID:
-				self.contador = self.contador +1
 				return None
 
-		self.contador = self.contador +1
 		aresta= Aresta(v1,v2)
 		self.lArestas.append(aresta)
 		self.iTotalArestas+=1
@@ -221,7 +250,7 @@ class Grafo(object):
 
 		for a in lArestasRemovidas:
 			self.newA(a.t[0], a.t[1], verificar=False)
-			contador = contador+1
+			contador += 1
 
 		grauMinimo = self.getMenorGrau()
 
@@ -245,45 +274,17 @@ class Grafo(object):
 			self.gerarArvore()
 			return
 
-		self.contador = 0
-
 		for v1 in self.lVertices:
 			for v2 in self.lVertices:
 				self.newA(v1, v2, verificar=False)
 
-		print("Fez o newA ", self.contador)
-
 		self.gerarArvore()
 
+	def prepareToSave(self):
+		contador=0
+		for v in self.lVertices:
+			contador+=1
+			v.iID = contador		
+		self.iVid = contador
 
-
-class Vertice(object):
-	"""docstring for Vertice"""
-
-	def __init__(self, Grafo, Rect):
-		super(Vertice, self).__init__()
-		self.Rect = Rect
-		self.iID = int( Grafo.iVid ) +1
-		Grafo.iVid += 1
-		self.lAdjs=[]
-
-
-	def mostrar(self):
-		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
-		print(self.iID, self.Rect.center, sep=' - ')
-		
-		
-
-class Aresta(object):
-	"""docstring for Aresta"""
-
-	def __init__(self, v1, v2):
-		super(Aresta, self).__init__()
-		self.Rect = v1.Rect.union(v2.Rect)
-		self.t = (v1, v2)
-		self.pertenceArvore=False
-		
-	def mostrar(self):
-		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
-		print("(", self.Rect.center,' )')	
-
+	
