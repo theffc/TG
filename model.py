@@ -28,6 +28,7 @@ class Aresta(object):
 		self.Rect = v1.Rect.union(v2.Rect)
 		self.t = (v1, v2)
 		self.pertenceArvore=False
+		self.cor = 
 		
 	def mostrar(self):
 		#print ( str(self.iID)+ ' - ' + str(self.Rect) , ',', '')
@@ -73,9 +74,11 @@ class Grafo(object):
 				self.removeA(a, verificar=False)
 
 
-	def removeV(self):
-		print ("entrei no removeV")
-		v = self.selectedV
+	def removeV(self, vertice=None):
+		if not vertice:
+			v = self.selectedV
+		else:
+			v = vertice
 
 		if v.lAdjs:
 			self.removeArestasDoV(v)
@@ -85,8 +88,6 @@ class Grafo(object):
 		self.selectedV = None
 		self.selectedA = None
 		self.gerarArvore()
-
-		print ("sai do removeV")
 
 	def mostrarV(self):
 		print('[ VERTICES')	
@@ -270,7 +271,7 @@ class Grafo(object):
 
 
 	def completar(self):
-		if(self.iTotalVertices * (self.iTotalVertices-1)/2) == self.iTotalArestas:
+		if(self.iTotalVertices * (self.iTotalVertices-1)/2) == self.iTotalArestas: #grafo completo
 			self.gerarArvore()
 			return
 
@@ -287,4 +288,8 @@ class Grafo(object):
 			v.iID = contador		
 		self.iVid = contador
 
-	
+	def reset(self):
+		for v in self.lVertices:
+			v.cor= 0
+		for a in self.lArestas:
+			a.cor= 

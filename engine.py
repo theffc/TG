@@ -33,7 +33,10 @@ while not quitGame:
 		#1 mouse click
 		elif event.type == pygame.MOUSEBUTTONDOWN:
 			local = grafo.verificarClique(event.pos)
-			print (local)
+			if isinstance(local, model.Vertice):
+				print (local.iID,"==", local)
+			else:
+				print (local)
 			clock.tick_busy_loop(FPS*0.1)
 
 			#2 doubleclick
@@ -144,19 +147,30 @@ while not quitGame:
 					grafo = pickle.load(f)
 					f.close()
 
+			#2 tecla J
+			#	manda colorir os vertices de forma aleatoria
 			elif teclas[pygame.K_j]:
 				houveMudancas = True
 				functions.colorirVertices(random.sample(grafo.lVertices, len(grafo.lVertices)))
 
+			#2 tecla K
+			#	manda colorir os vertices ordenados considerando os de maiores grau primeiro
 			elif teclas[pygame.K_k]:
 				houveMudancas=True
 				x=sorted(grafo.lVertices, key=lambda v: len(v.lAdjs), reverse=True)
 				print(x)
 				functions.colorirVertices(x)
 				
+			#2 tecla L
+			# manda colorir do modo Primeiro Maior
+			elif teclas[pygame.K_l]:
+				houveMudancas=True
+				functions.colorirPrimeiroMenor(grafo)
+
 	#for end
 
 	if houveMudancas:
+		grafo.reset()
 		gui.desenhar(grafo)
 		houveMudancas =False
 
