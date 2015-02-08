@@ -15,12 +15,13 @@ CIRCLE = int(WIDTH * 0.0025)
 LINE = int(WIDTH * 0.002)
 SCREEN = pygame.display.set_mode(RESOLUTION, pygame.RESIZABLE)#, pygame.FULLSCREEN)
 TEXTO = pygame.font.Font(None, 30)
+TEXT_H = TEXTO.get_height()
 
-BLUE = (10,100,255)
-PINK = 	(240,10,240)
-BLACK = (25,25,25)
-GREEN = (20,255,100)
-ORANGE = (255, 120, 30)
+COR_VERTICE = (10,100,255)
+COR_ARESTA = (240,10,240)
+COR_BACKGROUND = (25,25,25)
+COR_SELECTED = (20,255,100)
+COR_ARVORE = (255, 120, 30)
 GRAY = (100,100,100)
 WHITE = (255,255,255)
 LIGHTGRAY = (112,128,144)
@@ -37,11 +38,12 @@ SALMON = (250,128,114)
 OLIVE = (128,128,0)
 SAND = (244,164,96)
 
-lCores = [BLUE,FOREST,YELLOW,RED,PURPLE,AQUAMARINE,BROWN,BEJE,TURQUESA,SALMON,OLIVE,SAND]
+lCores = [COR_VERTICE,AQUAMARINE,YELLOW,RED,PURPLE,BROWN,BEJE,TURQUESA,SALMON,OLIVE,SAND]
+
 
 # desenha todas as coisas na tela
 def desenhar(grafo):
-	SCREEN.fill(BLACK)
+	SCREEN.fill(COR_BACKGROUND)
 
 	if grafo.antigoRect:
 		pygame.draw.circle(SCREEN, GRAY, grafo.antigoRect.center, RECT_SIZE, CIRCLE)
@@ -50,60 +52,70 @@ def desenhar(grafo):
 		v.Rect = pygame.draw.circle(SCREEN,lCores[v.cor],v.Rect.center,RECT_SIZE, CIRCLE)
 
 	for a in grafo.lArestas:
-		if a.pertenceArvore:
-			cor = ORANGE
-		else:
-			cor = LIGHTGRAY
-		
-		a.Rect = pygame.draw.line(SCREEN, cor, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
+		a.Rect = pygame.draw.line(SCREEN, a.cor, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
 
 	if grafo.selectedV:
-		grafo.selectedV.Rect = pygame.draw.circle(SCREEN,GREEN,grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
+		grafo.selectedV.Rect = pygame.draw.circle(SCREEN,COR_SELECTED,grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
 
 	if grafo.selectedA:
-		grafo.selectedA.Rect = pygame.draw.line(SCREEN,GREEN,grafo.selectedA.t[0].Rect.center,grafo.selectedA.t[1].Rect.center, LINE)
+		grafo.selectedA.Rect = pygame.draw.line(SCREEN,COR_SELECTED,grafo.selectedA.t[0].Rect.center,grafo.selectedA.t[1].Rect.center, LINE)
 
 	for v in grafo.lVertices:
 		sVid = str(v.iID)
 		textSurf = TEXTO.render(sVid, 1, WHITE )
 		SCREEN.blit(textSurf, v.Rect.center)
 
-	if grafo.iConexo:
-		texto = str(grafo.iConexo) + "-CONEXO"
-		textSurf = TEXTO.render(texto,1, ORANGE)
-	else:
-		textSurf = TEXTO.render("NAO conexo",1, PINK)
-	SCREEN.blit(textSurf, (10,10))
+	if grafo.iConexo is not -1:
+		if grafo.iConexo:
+			texto = str(grafo.iConexo) + "-conexo"
+			textSurf = TEXTO.render(texto,1, COR_ARVORE)
+		else:
+			textSurf = TEXTO.render("NAO conexo",1, LIGHTGRAY)
+		SCREEN.blit(textSurf, (10,10))
 
-
+	if grafo.iCores:
+		if grafo.iCores==1:
+			texto= str(grafo.iCores)+" cor"
+		else:
+			texto= str(grafo.iCores)+" cores"
+		textSurf= TEXTO.render(texto, 1, lCores[1])
+		SCREEN.blit(textSurf, (10, 10+TEXT_H))
 
 	pygame.display.update()
 #desenhar end
 
 # desenha apenas o vertice e a aresta que foi passada
-def desenharPouco(grafo, v=None, a=None):
+def desenharPouco(grafo, v=None, a=None, update=True):
 	rv = None
 	ra = None
 	rsv = None
 	rsa = None
+	rant= None
+
+	if not hasattr(desenharPouco, "dirtyRects"):
+		desenharPouco.dirtyRects = []
+
+	if grafo.antigoRect:
+		rant = pygame.draw.circle(SCREEN, COR_BACKGROUND, grafo.antigoRect.center, RECT_SIZE, CIRCLE)
+
+	if grafo.selectedV:
+		rsv = pygame.draw.circle(SCREEN,COR_SELECTED,grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
+
+	if grafo.selectedA:
+		rsa = pygame.draw.line(SCREEN,COR_SELECTED,grafo.selectedA.t[0].Rect.center,grafo.selectedA.t[1].Rect.center, LINE)
 
 	if v:
 		rv = pygame.draw.circle(SCREEN,lCores[v.cor],v.Rect.center,RECT_SIZE, CIRCLE)
 
 	if a:
-		if a.pertenceArvore:
-			cor = ORANGE
-		else:
-			cor = PINK
-		ra = pygame.draw.line(SCREEN, cor, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
+		ra = pygame.draw.line(SCREEN, a.cor, a.t[0].Rect.center, a.t[1].Rect.center, LINE)
 
-	if grafo.selectedV:
-		rsv = pygame.draw.circle(SCREEN,GREEN,grafo.selectedV.Rect.center,RECT_SIZE, CIRCLE)
-
-	if grafo.selectedA:
-		rsa = pygame.draw.line(SCREEN,GREEN,grafo.selectedA.t[0].Rect.center,grafo.selectedA.t[1].Rect.center, LINE)
-
-	pygame.display.update([rv, ra, rsv, rsa])
+	if update:
+		x=[rant, rv, ra, rsv, rsa]+desenharPouco.dirtyRects
+		pygame.display.update(x)
+		desenharPouco.dirtyRects=[]
+	else:
+		desenharPouco.dirtyRects+= [rv,ra,rsv,rsa,rant]
 #desenharPouco end
 
 
