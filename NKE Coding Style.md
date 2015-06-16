@@ -1,10 +1,49 @@
-#NKE's Coding Style
+#NKE Coding Style
+
+##Portability
+
+Portability refers to how easily —if at all— code can move from one system
+architecture to another. As little code as possible is machine-specific.
+Assembly is kept to a minimum, and interfaces and features are sufficiently
+general and abstract so that they work on a wide range of architectures.
+The obvious benefit is the relative ease with which a new architecture can
+be supported. The downside is that architecturespecific features are not
+supported, and code cannot be hand-tuned for a specific machine. With this
+design choice, optimal code is traded for portable code.
+
+Everytime is possible, code should be written in C.
+
+####Word
+
+A word is the amount of data that a machine can process at one time. A word is
+an integer number of bytes—for example, one, two, four, or eight.When someone
+talks about the “n-bits” of a machine, they are generally talking about the
+machine’s word size.
+
+Typically, the virtual memory address space is equal to the word size, although
+the physical address space is sometimes less. Consequently, the size of a
+pointer is equal to the word size.
+
+####C Data Types
+
+- *char* is always 1 byte or 8 bits
+- *int* is always 4 bytes or 32 bits
+- *short* is always 2 bytes 16 bits
+- never assume the size of *pointers* or *long*
+- *Signedness Of Char*
 
 ##Indentation
 
+The whole idea behind indentation is to clearly define wherea block of
+control starts and ends. Indentation must be done using tabular characters,
+not spaces. Thus, It's important to check whether your text editor,
+when you press the "TAB" key, effectively puts a *tab character*, or a
+sequence of space characters. Also, you also should notice how your text editor
+interprets *tab characters* that are alredy in the document (how many spaces
+they show to you). *Tabs* are 8 characters.
+
 In short, 8-char indents make things easier to read, and have the added
 benefit of warning you when you're nesting your functions too deep.
-Heed that warning.
 
 The preferred way to ease multiple indentation levels in a switch statement is
 to align the "switch" and its subordinate "case" labels in the same column
@@ -29,10 +68,16 @@ default:
 }
 ```
 
+Don't put multiple statements or assignments on a single line.
+
+Get a decent editor and don't leave whitespace at the end of lines; coding
+style is all about readability and maintainability using commonly available
+tools.
+
 
 ##Breaking long lines and strings
 
-The limit on the length of lines is 80 columns and this is a strongly
+The limit on the length of lines is **80 columns** and this is a strongly 
 preferred limit.
 
 Statements longer than 80 columns will be broken into sensible chunks, unless
@@ -40,7 +85,7 @@ exceeding 80 columns significantly increases readability and does not hide
 information. Descendants are always substantially shorter than the parent and
 are placed substantially to the right. The same applies to function headers
 with a long argument list. However, never break user-visible strings such as
-printk messages, because that breaks the ability to grep for them.
+print messages, because that breaks the ability to *grep* for them.
 
 
 ##Placing Braces and Spaces
@@ -73,7 +118,7 @@ opening brace at the beginning of the next line, thus:
 ```c
 int function(int x)
 {
-	body of function
+	/*body of function*/
 }
 ```
 
@@ -84,7 +129,7 @@ this:
 
 ```c
 do {
-	body of do-loop
+	/*body of do-loop*/
 } while (condition);
 ```
 
@@ -138,12 +183,12 @@ if (condition) {
 
 ###Spaces
 
-Linux kernel style for use of spaces depends (mostly) on
-function-versus-keyword usage.  Use a space after (most) keywords.  The
-notable exceptions are sizeof, typeof, alignof, and __attribute__, which look
-somewhat like functions (and are usually used with parentheses in Linux,
-although they are not required in the language, as in: "sizeof info" after
-"struct fileinfo info;" is declared).
+Usage of spaces depends (mostly) on function-versus-keyword usage.  Use a 
+space after (most) keywords.  The notable exceptions are *sizeof*, *typeof*, 
+*alignof*, and __attribute__, which look somewhat like functions (and are 
+usually used with parentheses in Linux, although they are not required
+in the language, as in: "sizeof info" after "struct fileinfo info;" 
+is declared).
 
 So use a space after these keywords:
 
@@ -211,14 +256,12 @@ It's a _mistake_ to use typedef for structures and pointers. When you see a
 ```c
 vps_t a;
 ```
-
 in the source, what does it mean?
-In contrast, if it says
 
+In contrast, if it says
 ```c
 struct virtual_container *a;
 ```
-
 you can actually tell what "a" is.
 
 Lots of people think that typedefs "help readability". Not so. They are
@@ -264,7 +307,7 @@ Although it would only take a short amount of time for the eyes and
 brain to become accustomed to the standard types like 'uint32_t',
 some people object to their use anyway.
 
-Therefore, the Linux-specific 'u8/u16/u32/u64' types and their
+Therefore, the Linux-specific *u8/u16/u32/u64* types and their
 signed equivalents which are identical to standard types are
 permitted -- although they are not mandatory in new code of your
 own.
@@ -325,7 +368,7 @@ Although this is not required by the C language, it is preferred in Linux
 because it is a simple way to add valuable information for the reader.
 
 
-##Centralized exiting of functions
+###Centralized exiting of functions
 
 Although deprecated by some people, the equivalent of the *goto* statement is
 used frequently by compilers in form of the unconditional jump instruction.
@@ -402,7 +445,7 @@ it.
 
 
 Linux style for comments is the C89 "/* ... */" style.
-Don't use C99-style "// ..." comments.
+**Don't** use C99-style "// ..." comments.
 
 The preferred style for long (multi-line) comments is:
 
@@ -445,6 +488,10 @@ And this, how a structure should be commented:
 	 * Longer description of this structure.
 	 */
 
+The opening comment mark "/**" - showed above - is reserved for kernel-doc 
+comments. Only comments so marked will be considered by the kernel-doc scripts,
+and any comment so marked must be in kernel-doc format.  
+
 It's also important to comment data, whether they are basic types or derived
 types.  To this end, use just **one data declaration per line** (no commas for
 multiple data declarations).  This leaves you room for a small comment on each
@@ -476,59 +523,56 @@ Macros with multiple statements should be enclosed in a do - while block:
 	} while (0)
 ```
 
-Things to avoid when using macros:
+Things to **avoid** when using macros:
 
-1) macros that affect control flow:
+- macros that affect control flow:
 
-```c
-#define FOO(x)					\
-	do {					\
-		if (blah(x) < 0)		\
-			return -EBUGGERED;	\
-	} while(0)
-```
+	```c
+	#define FOO(x)					\
+		do {					\
+			if (blah(x) < 0)		\
+				return -EBUGGERED;	\
+		} while(0)
+	```
 
-is a _very_ bad idea.  It looks like a function call but exits the "calling"
-function; don't break the internal parsers of those who will read the code.
+	is a very bad idea.  It looks like a function call but exits the "calling"
+	function; don't break the internal parsers of those who will read the code.
 
-2) macros that depend on having a local variable with a magic name:
+- macros that depend on having a local variable with a magic name:
 
-```c
-#define FOO(val) bar(index, val)
-```
+	```c
+	#define FOO(val) bar(index, val)
+	```
 
-might look like a good thing, but it's confusing as hell when one reads the
-code and it's prone to breakage from seemingly innocent changes.
+	might look like a good thing, but it's confusing as hell when one reads the
+	code and it's prone to breakage from seemingly innocent changes.
 
-3) macros with arguments that are used as l-values: FOO(x) = y; will
+- macros with arguments that are used as l-values: FOO(x) = y; will
 bite you if somebody e.g. turns FOO into an inline function.
 
-4) forgetting about precedence: macros defining constants using expressions
+- forgetting about precedence: macros defining constants using expressions
 must enclose the expression in parentheses. Beware of similar issues with
 macros using parameters.
 
-```c
-#define CONSTANT 0x4000
-#define CONSTEXP (CONSTANT | 3)
-```
+	```c
+	#define CONSTANT 0x4000
+	#define CONSTEXP (CONSTANT | 3)
+	```
 
-5) namespace collisions when defining local variables in macros resembling
+- namespace collisions when defining local variables in macros resembling
 functions:
 
-```c
-#define FOO(x)				\
-({					\
-	typeof(x) ret;			\
-	ret = calc_ret(x);		\
-	(ret);				\
-)}
-```
+	```c
+	#define FOO(x)				\
+	({					\
+		typeof(x) ret;			\
+		ret = calc_ret(x);		\
+		(ret);				\
+	)}
+	```
 
-ret is a common name for a local variable - __foo_ret is less likely
-to collide with an existing variable.
-
-The cpp manual deals with macros exhaustively. The gcc internals manual also
-covers RTL which is used frequently with assembly language in the kernel.
+	ret is a common name for a local variable - __foo_ret is less likely
+	to collide with an existing variable.
 
 
 ##Printing kernel messages
@@ -574,9 +618,6 @@ The preferred form for allocating a zeroed array is the following:
 p = kcalloc(n, sizeof(...), ...);
 ```
 
-Both forms check for overflow on the allocation size n * sizeof(...),
-and return NULL if that occurred.
-
 
 ##The inline disease
 
@@ -618,9 +659,9 @@ between integers and booleans then the compiler would find these mistakes
 for us... but it doesn't.  To help prevent such bugs, always follow this
 convention:
 
-	If the name of a function is an action or an imperative command,
-	the function should return an error-code integer.  If the name
-	is a predicate, the function should return a "succeeded" boolean.
+- If the name of a function is an action or an imperative command, the 
+function should return an error-code integer.  If the name is a predicate, 
+the function should return a "succeeded" boolean.
 
 For example, "add work" is a command, and the add_work() function returns 0
 for success or -EBUSY for failure.  In the same way, "PCI device present" is
@@ -716,6 +757,9 @@ expression used.  For instance:
 ```
 
 ##References
+
+"Linux kernel coding style"
+: https://github.com/torvalds/linux/blob/master/Documentation/CodingStyle
 
 "Kernel CodingStyle, by greg@kroah.com at OLS 2002"
 : http://www.kroah.com/linux/talks/ols_2002_kernel_codingstyle_talk/html/
