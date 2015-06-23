@@ -16,7 +16,7 @@ Everytime is possible, code should be written in C.
 ####Word
 
 A word is the amount of data that a machine can process at one time. A word is
-an integer number of bytes—for example, one, two, four, or eight.When someone
+an integer number of bytes—for example, one, two, four, or eight. When someone
 talks about the “n-bits” of a machine, they are generally talking about the
 machine’s word size.
 
@@ -26,21 +26,104 @@ pointer is equal to the word size.
 
 ####C Data Types
 
-- *char* is always 1 byte or 8 bits
-- *int* is always 4 bytes or 32 bits
-- *short* is always 2 bytes 16 bits
-- never assume the size of *pointers* or *long*
-- *Signedness Of Char*
+- **char** is always 1 byte or 8 bits. The signedness or unsignedness of a char variable needs to be explicitly declared.
+- **int** is always 4 bytes or 32 bits
+- **short** is always 2 bytes 16 bits
+- never assume the size of **pointers** or **long**
+
+Some abreviations are used to indicate the size of some data types on different architectures:
+
+- **ILPX** : int, long and pointers of size X
+- **LPX** : long and pointers of size X
+- **LLPX** : long long pointers of size X
+
+#####Explicitly Sized Data Types
+
+    s8, u8, s16, u16, s32, u32, s64, u64
+
+They are generally used to deal with hardware properties. Thus, they need to be differently declared on distinct architectures. E.g.: In a 64 bits LP64 machine, the u64 type would be declared as "*typedef unsigned long u64*"
+
+
+##Commenting
+
+Comments are good, but there is also a danger of over-commenting.  NEVER
+try to explain HOW your code works in a comment: it's much better to
+write the code so that the _working_ is obvious, and it's a waste of
+time to explain badly written code.
+
+Generally, you want your comments to tell WHAT your code does, not HOW.
+Also, try to avoid putting comments inside a function body: if the
+function is so complex that you need to separately comment parts of it,
+you should probably split your function into simpler ones.  You can make
+small comments to note or warn about something particularly clever (or
+ugly), but try to avoid excess.  Instead, put the comments at the head
+of the function, telling people what it does, and possibly WHY it does
+it.
+
+
+Linux style for comments is the C89 **"/* ... */"** style.
+**Don't** use C99-style "// ..." comments.
+
+The preferred style for long (multi-line) comments is:
+
+    /*
+     * This is the preferred style for multi-line
+     * comments in the Linux kernel source code.
+     * Please use it consistently.
+     *
+     * Description:  A column of asterisks on the left side,
+     * with beginning and ending almost-blank lines.
+     */
+
+This is how a function should be commented (according to the kernel-doc format):
+
+    /**
+     * foobar() - short function description of foobar
+     * @arg1:   Describe the first argument to foobar.
+     * @arg2:   Describe the second argument to foobar.
+     *      One can provide multiple line descriptions
+     *      for arguments.
+     *
+     * A longer description, with more discussion of the function foobar()
+     * that might be useful to those using or modifying it.  Begins with
+     * empty comment line, and may include additional embedded empty
+     * comment lines.
+     *
+     * The longer description can have multiple paragraphs.
+     *
+     * Return: Describe the return value of foobar.
+     */
+
+And this, how a structure should be commented:
+
+    /**
+     * struct blah - the basic blah structure
+     * @mem1:   describe the first member of struct blah
+     * @mem2:   describe the second member of struct blah,
+     *      perhaps with more lines and words.
+     *
+     * Longer description of this structure.
+     */
+
+The opening comment mark "/**" - showed above - is reserved for kernel-doc 
+comments. Only comments so marked will be considered by the kernel-doc scripts,
+and any comment so marked must be in kernel-doc format.  
+
+It's also important to comment data, whether they are basic types or derived
+types.  To this end, use just **one data declaration per line** (no commas for
+multiple data declarations).  This leaves you room for a small comment on each
+item, explaining its use.
+
 
 ##Indentation
 
-The whole idea behind indentation is to clearly define wherea block of
+The whole idea behind indentation is to clearly define where a block of
 control starts and ends. Indentation must be done using tabular characters,
 not spaces. Thus, It's important to check whether your text editor,
 when you press the "TAB" key, effectively puts a *tab character*, or a
 sequence of space characters. Also, you also should notice how your text editor
 interprets *tab characters* that are alredy in the document (how many spaces
-they show to you). *Tabs* are 8 characters.
+they show to you). *Tabs are 8 characters*.
 
 In short, 8-char indents make things easier to read, and have the added
 benefit of warning you when you're nesting your functions too deep.
@@ -145,8 +228,6 @@ if (x == y) {
 }
 ```
 
-Rationale: K&R.
-
 Also, note that this brace-placement also minimizes the number of empty
 (or almost empty) lines, without any loss of readability.  Thus, as the
 supply of new-lines on your screen is not a renewable resource (think
@@ -185,7 +266,7 @@ if (condition) {
 
 Usage of spaces depends (mostly) on function-versus-keyword usage.  Use a 
 space after (most) keywords.  The notable exceptions are *sizeof*, *typeof*, 
-*alignof*, and __attribute__, which look somewhat like functions (and are 
+*alignof*, and _attribute_, which look somewhat like functions (and are 
 usually used with parentheses in Linux, although they are not required
 in the language, as in: "sizeof info" after "struct fileinfo info;" 
 is declared).
@@ -237,12 +318,12 @@ Do not leave trailing whitespace at the ends of lines.
 
 ##Naming
 
-GLOBAL variables (to be used only if you _really_ need them) need to
+**GLOBAL** variables (to be used only if you _really_ need them) need to
 have descriptive names, as do global functions.  If you have a function
 that counts the number of active users, you should call that
 "count_active_users()" or similar, you should _not_ call it "cntusr()".
 
-LOCAL variable names should be short, and to the point.  If you have
+**LOCAL** variable names should be short, and to the point.  If you have
 some random integer loop counter, it should probably be called "i".
 Calling it "loop_counter" is non-productive, if there is no chance of it
 being mis-understood.  Similarly, "tmp" can be just about any type of
@@ -267,66 +348,65 @@ you can actually tell what "a" is.
 Lots of people think that typedefs "help readability". Not so. They are
 useful only for:
 
-**(a) totally opaque objects (where the typedef is actively used to _hide_
+- **(a) totally opaque objects (where the typedef is actively used to _hide_
 what the object is).**
 
-Example: "pte_t" etc. opaque objects that you can only access using
-the proper accessor functions.
+    Example: "pte_t" etc. opaque objects that you can only access using
+    the proper accessor functions.
 
-NOTE! Opaqueness and "accessor functions" are not good in themselves.
-The reason we have them for things like pte_t etc. is that there
-really is absolutely _zero_ portably accessible information there.
+    NOTE! Opaqueness and "accessor functions" are not good in themselves.
+    The reason we have them for things like pte_t etc. is that there
+    really is absolutely _zero_ portably accessible information there.
 
 
-**(b) Clear integer types, where the abstraction _helps_ avoid confusion
+- **(b) Clear integer types, where the abstraction _helps_ avoid confusion
 whether it is "int" or "long".**
 
-u8/u16/u32 are perfectly fine typedefs, although they fit into
-category (d) better than here.
+    NOTE! Again - there needs to be a _reason_ for this. If something is
+    "unsigned long", then there's no reason to do:
 
-NOTE! Again - there needs to be a _reason_ for this. If something is
-"unsigned long", then there's no reason to do:
+    ```c
+    typedef unsigned long myflags_t;
+    ```
 
-```c
-typedef unsigned long myflags_t;
-```
+    but if there is a clear reason for why it under certain circumstances
+    might be an "unsigned int" and under other configurations might be
+    "unsigned long", then by all means go ahead and use a typedef.
 
-but if there is a clear reason for why it under certain circumstances
-might be an "unsigned int" and under other configurations might be
-"unsigned long", then by all means go ahead and use a typedef.
+    u8/u16/u32 are perfectly fine typedefs, although they fit into
+    category (d) better than here.
 
-
-**(c) when you use sparse to literally create a _new_ type for
+- **(c) when you use sparse to literally create a _new_ type for
 type-checking.**
 
 
-**(d) New types which are identical to standard C99 types, in certain
+- **(d) New types which are identical to standard C99 types, in certain
 exceptional circumstances.**
 
-Although it would only take a short amount of time for the eyes and
-brain to become accustomed to the standard types like 'uint32_t',
-some people object to their use anyway.
+    Although it would only take a short amount of time for the eyes and
+    brain to become accustomed to the standard types like 'uint32_t',
+    some people object to their use anyway.
 
-Therefore, the Linux-specific *u8/u16/u32/u64* types and their
-signed equivalents which are identical to standard types are
-permitted -- although they are not mandatory in new code of your
-own.
+    Therefore, the Linux-specific *u8/u16/u32/u64* types and their
+    signed equivalents which are identical to standard types are
+    permitted -- although they are not mandatory in new code of your
+    own.
 
-When editing existing code which already uses one or the other set
-of types, you should conform to the existing choices in that code.
+    When editing existing code which already uses one or the other set
+    of types, you should conform to the existing choices in that code.
 
 
-**(e) Types safe for use in userspace.**
+- **(e) Types safe for use in userspace.**
 
-In certain structures which are visible to userspace, we cannot
-require C99 types and cannot use the 'u32' form above. Thus, we
-use __u32 and similar types in all structures which are shared
-with userspace.
+    In certain structures which are visible to userspace, we cannot
+    require C99 types and cannot use the 'u32' form above. Thus, we
+    use __u32 and similar types in all structures which are shared
+    with userspace.
 
-Maybe there are other cases too, but the rule should basically be to NEVER
-EVER use a typedef unless you can clearly match one of those rules.
+    Maybe there are other cases too, but the rule should basically be to NEVER
+    EVER use a typedef unless you can clearly match one of those rules.
 
-**In general, a pointer, or a struct that has elements that can reasonably
+- **In general, a pointer, or a struct that has elements that can reasonably
 be directly accessed should _never_ be a typedef.**
 
 
@@ -351,24 +431,43 @@ Another measure of the function is the number of local variables.  They
 shouldn't exceed 5-10, or you're doing something wrong.  Re-think the
 function, and split it into smaller pieces.
 
-In source files, separate functions with one blank line.  If the function is
-exported, the EXPORT* macro for it should follow immediately after the closing
-function brace line.  E.g.:
-
-```c
-int system_is_up(void)
-{
-	return system_state == SYSTEM_RUNNING;
-}
-EXPORT_SYMBOL(system_is_up);
-```
+In source files, separate functions with one blank line.
 
 In function prototypes, include parameter names with their data types.
 Although this is not required by the C language, it is preferred in Linux
 because it is a simple way to add valuable information for the reader.
 
+###Function Return Values and Names
 
-###Centralized exiting of functions
+Functions can return values of many different kinds, and one of the
+most common is a value indicating whether the function succeeded or
+failed.  Such a value can be represented as an error-code integer
+(-Exxx = failure, 0 = success) or a "succeeded" boolean (0 = failure,
+non-zero = success).
+
+Mixing up these two sorts of representations is a fertile source of
+difficult-to-find bugs.  If the C language included a strong distinction
+between integers and booleans then the compiler would find these mistakes
+for us... but it doesn't.  To help prevent such bugs, always follow this
+convention:
+
+- If the name of a function is an action or an imperative command, the 
+function should return an error-code integer.  If the name is a predicate, 
+the function should return a "succeeded" boolean.
+
+For example, "add work" is a command, and the add_work() function returns 0
+for success or -EBUSY for failure.  In the same way, "PCI device present" is
+a predicate, and the pci_dev_present() function returns 1 if it succeeds in
+finding a matching device or 0 if it doesn't.
+
+Functions whose return value is the actual result of a computation, rather
+than an indication of whether the computation succeeded, are not subject to
+this rule.  Generally they indicate failure by returning some out-of-range
+result.  Typical examples would be functions that return pointers; they use
+NULL or the ERR_PTR mechanism to report failure.
+
+
+###Centralized Exiting of Functions
 
 Although deprecated by some people, the equivalent of the *goto* statement is
 used frequently by compilers in form of the unconditional jump instruction.
@@ -425,77 +524,6 @@ err:
 
 The bug in this code is that on some exit paths "foo" is NULL.  Normally the
 fix for this is to split it up into two error labels "err_bar:" and "err_foo:".
-
-
-##Commenting
-
-Comments are good, but there is also a danger of over-commenting.  NEVER
-try to explain HOW your code works in a comment: it's much better to
-write the code so that the _working_ is obvious, and it's a waste of
-time to explain badly written code.
-
-Generally, you want your comments to tell WHAT your code does, not HOW.
-Also, try to avoid putting comments inside a function body: if the
-function is so complex that you need to separately comment parts of it,
-you should probably split your function into simpler ones.  You can make
-small comments to note or warn about something particularly clever (or
-ugly), but try to avoid excess.  Instead, put the comments at the head
-of the function, telling people what it does, and possibly WHY it does
-it.
-
-
-Linux style for comments is the C89 "/* ... */" style.
-**Don't** use C99-style "// ..." comments.
-
-The preferred style for long (multi-line) comments is:
-
-	/*
-	 * This is the preferred style for multi-line
-	 * comments in the Linux kernel source code.
-	 * Please use it consistently.
-	 *
-	 * Description:  A column of asterisks on the left side,
-	 * with beginning and ending almost-blank lines.
-	 */
-
-This is how a function should be commented (according to the kernel-doc format):
-
-	/**
-	 * foobar() - short function description of foobar
-	 * @arg1:	Describe the first argument to foobar.
-	 * @arg2:	Describe the second argument to foobar.
-	 *		One can provide multiple line descriptions
-	 *		for arguments.
-	 *
-	 * A longer description, with more discussion of the function foobar()
-	 * that might be useful to those using or modifying it.  Begins with
-	 * empty comment line, and may include additional embedded empty
-	 * comment lines.
-	 *
-	 * The longer description can have multiple paragraphs.
-	 *
-	 * Return: Describe the return value of foobar.
-	 */
-
-And this, how a structure should be commented:
-
-	/**
-	 * struct blah - the basic blah structure
-	 * @mem1:	describe the first member of struct blah
-	 * @mem2:	describe the second member of struct blah,
-	 *		perhaps with more lines and words.
-	 *
-	 * Longer description of this structure.
-	 */
-
-The opening comment mark "/**" - showed above - is reserved for kernel-doc 
-comments. Only comments so marked will be considered by the kernel-doc scripts,
-and any comment so marked must be in kernel-doc format.  
-
-It's also important to comment data, whether they are basic types or derived
-types.  To this end, use just **one data declaration per line** (no commas for
-multiple data declarations).  This leaves you room for a small comment on each
-item, explaining its use.
 
 
 ##Macros, Enums and RTL
@@ -645,41 +673,7 @@ appears outweighs the potential value of the hint that tells gcc to do
 something it would have done anyway.
 
 
-##Function return values and names
-
-Functions can return values of many different kinds, and one of the
-most common is a value indicating whether the function succeeded or
-failed.  Such a value can be represented as an error-code integer
-(-Exxx = failure, 0 = success) or a "succeeded" boolean (0 = failure,
-non-zero = success).
-
-Mixing up these two sorts of representations is a fertile source of
-difficult-to-find bugs.  If the C language included a strong distinction
-between integers and booleans then the compiler would find these mistakes
-for us... but it doesn't.  To help prevent such bugs, always follow this
-convention:
-
-- If the name of a function is an action or an imperative command, the 
-function should return an error-code integer.  If the name is a predicate, 
-the function should return a "succeeded" boolean.
-
-For example, "add work" is a command, and the add_work() function returns 0
-for success or -EBUSY for failure.  In the same way, "PCI device present" is
-a predicate, and the pci_dev_present() function returns 1 if it succeeds in
-finding a matching device or 0 if it doesn't.
-
-All EXPORTed functions must respect this convention, and so should all
-public functions.  Private (static) functions need not, but it is
-recommended that they do.
-
-Functions whose return value is the actual result of a computation, rather
-than an indication of whether the computation succeeded, are not subject to
-this rule.  Generally they indicate failure by returning some out-of-range
-result.  Typical examples would be functions that return pointers; they use
-NULL or the ERR_PTR mechanism to report failure.
-
-
-##Chapter Inline assembly
+##Inline assembly
 
 In architecture-specific code, you may need to use inline assembly to interface
 with CPU or platform functionality.  Don't hesitate to do so when necessary.
@@ -687,7 +681,7 @@ However, don't use inline assembly gratuitously when C can do the job.  You can
 and should poke hardware from C when possible.
 
 Consider writing simple helper functions that wrap common bits of inline
-assembly, rather than repeatedly writing them with slight variations.  Remember
+assembly, rather than repeatedly writing them with slight variations. Remember
 that inline assembly can use C parameters.
 
 Large, non-trivial assembly functions should go in .S files, with corresponding
@@ -758,12 +752,12 @@ expression used.  For instance:
 
 ##References
 
-"Linux kernel coding style"
-: https://github.com/torvalds/linux/blob/master/Documentation/CodingStyle
+"Linux kernel coding style", Linus Torvaldis
+: github.com/torvalds/linux/blob/master/Documentation/CodingStyle
 
 "Kernel CodingStyle, by greg@kroah.com at OLS 2002"
-: http://www.kroah.com/linux/talks/ols_2002_kernel_codingstyle_talk/html/
+: www.kroah.com/linux/talks/ols_2002_kernel_codingstyle_talk/html/
 
 "How to format kernel-doc comments"
-: Documentation/kernel-doc-nano-HOWTO.txt
+: github.com/torvalds/linux/blob/masterDocumentation/kernel-doc-nano-HOWTO.txt
 
